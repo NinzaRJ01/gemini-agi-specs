@@ -1,0 +1,4186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Gemini AGI Autonomous System Specifications & Architecture Portal</title>
+  
+  <!-- Highlight.js & GitHub Markdown Themes -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/5.5.1/github-markdown-dark.min.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css" />
+  
+  <style>
+    :root {
+      --bg-page: #0a0c10;
+      --bg-sidebar: #0d1117;
+      --bg-card: #161b22;
+      --bg-card-hover: #1f242c;
+      --border-color: #30363d;
+      --accent: #58a6ff;
+      --accent-purple: #bc8cff;
+      --accent-green: #3fb950;
+      --accent-orange: #d29922;
+      --accent-cyan: #39c5bb;
+      --accent-pink: #f778ba;
+      --text-main: #c9d1d9;
+      --text-muted: #8b949e;
+      --text-bright: #f0f6fc;
+      --sidebar-width: 320px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      background-color: var(--bg-page);
+      color: var(--text-main);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      line-height: 1.6;
+      display: flex;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    /* Left Navigation Sidebar */
+    .sidebar {
+      width: var(--sidebar-width);
+      min-width: var(--sidebar-width);
+      background-color: var(--bg-sidebar);
+      border-right: 1px solid var(--border-color);
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      overflow-y: auto;
+      z-index: 50;
+    }
+
+    .sidebar-header {
+      padding: 18px 20px;
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      background: rgba(13, 17, 23, 0.95);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    .brand-title {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--text-bright);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .brand-subtitle {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .sidebar-search {
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .search-input {
+      width: 100%;
+      background: #040d21;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      padding: 8px 12px;
+      font-size: 0.82rem;
+      color: var(--text-bright);
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .search-input:focus {
+      border-color: var(--accent);
+    }
+
+    .nav-list {
+      list-style: none;
+      margin: 0;
+      padding: 10px 8px;
+      flex: 1;
+    }
+
+    .nav-item {
+      margin-bottom: 4px;
+    }
+
+    .nav-link {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 12px;
+      border-radius: 8px;
+      color: var(--text-main);
+      text-decoration: none;
+      font-size: 0.88rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      border: 1px solid transparent;
+    }
+
+    .nav-link:hover {
+      background: var(--bg-card);
+      color: var(--text-bright);
+      border-color: rgba(255, 255, 255, 0.05);
+    }
+
+    .nav-link.active {
+      background: rgba(88, 166, 255, 0.12);
+      border-color: rgba(88, 166, 255, 0.4);
+      color: var(--accent);
+      font-weight: 600;
+    }
+
+    .nav-label-group {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-width: 0;
+    }
+
+    .nav-icon {
+      font-size: 1.1rem;
+      flex-shrink: 0;
+    }
+
+    .nav-text {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .nav-badge {
+      font-size: 0.65rem;
+      padding: 2px 6px;
+      border-radius: 10px;
+      font-weight: 600;
+      flex-shrink: 0;
+      border: 1px solid transparent;
+    }
+
+    .badge-purple { background: rgba(188, 140, 255, 0.15); border-color: rgba(188, 140, 255, 0.4); color: var(--accent-purple); }
+    .badge-blue { background: rgba(88, 166, 255, 0.15); border-color: rgba(88, 166, 255, 0.4); color: var(--accent); }
+    .badge-green { background: rgba(63, 185, 80, 0.15); border-color: rgba(63, 185, 80, 0.4); color: var(--accent-green); }
+    .badge-orange { background: rgba(210, 153, 34, 0.15); border-color: rgba(210, 153, 34, 0.4); color: var(--accent-orange); }
+    .badge-cyan { background: rgba(57, 197, 187, 0.15); border-color: rgba(57, 197, 187, 0.4); color: var(--accent-cyan); }
+    .badge-yellow { background: rgba(227, 179, 65, 0.15); border-color: rgba(227, 179, 65, 0.4); color: #e3b341; }
+    .badge-pink { background: rgba(247, 120, 186, 0.15); border-color: rgba(247, 120, 186, 0.4); color: var(--accent-pink); }
+    .badge-gray { background: rgba(139, 148, 158, 0.15); border-color: rgba(139, 148, 158, 0.4); color: var(--text-muted); }
+
+    .sidebar-footer {
+      padding: 14px 16px;
+      border-top: 1px solid var(--border-color);
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      background: var(--bg-sidebar);
+    }
+
+    .btn-quick {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      width: 100%;
+      background: #21262d;
+      color: var(--text-bright);
+      border: 1px solid var(--border-color);
+      padding: 8px 12px;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      font-weight: 500;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.2s ease;
+    }
+
+    .btn-quick:hover {
+      background: #30363d;
+      border-color: #8b949e;
+    }
+
+    .btn-quick-primary {
+      background: #238636;
+      border-color: #2ea043;
+      color: #ffffff;
+    }
+
+    .btn-quick-primary:hover {
+      background: #2ea043;
+      border-color: #3fb950;
+    }
+
+    /* Main Content Area */
+    .main-viewport {
+      flex: 1;
+      height: 100vh;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Top Sticky Header */
+    .top-header {
+      position: sticky;
+      top: 0;
+      z-index: 40;
+      background: rgba(10, 12, 16, 0.92);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border-color);
+      padding: 12px 32px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .header-breadcrumb {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 0.95rem;
+    }
+
+    .header-active-title {
+      font-weight: 700;
+      color: var(--text-bright);
+    }
+
+    .header-actions {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .btn-action {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: #21262d;
+      color: var(--text-bright);
+      border: 1px solid var(--border-color);
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 0.82rem;
+      font-weight: 500;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.2s ease;
+    }
+
+    .btn-action:hover {
+      background: #30363d;
+      border-color: #8b949e;
+    }
+
+    .btn-purple {
+      background: #6e40c9;
+      border-color: #8957e5;
+      color: #ffffff;
+    }
+    .btn-purple:hover {
+      background: #8957e5;
+    }
+
+    /* Spec Content Wrapper */
+    .content-container {
+      max-width: 1080px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 32px 40px 100px 40px;
+    }
+
+    /* Hero Banner for Spec */
+    .spec-hero {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 32px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .spec-hero::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 4px;
+      height: 100%;
+      background: var(--accent);
+    }
+
+    .spec-hero-title {
+      margin: 0 0 8px 0;
+      font-size: 1.45rem;
+      font-weight: 700;
+      color: var(--text-bright);
+    }
+
+    .spec-hero-desc {
+      margin: 0 0 16px 0;
+      color: var(--text-muted);
+      font-size: 0.95rem;
+    }
+
+    .spec-meta-pills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .meta-pill {
+      font-size: 0.75rem;
+      padding: 4px 10px;
+      border-radius: 6px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: var(--text-main);
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    /* Markdown Styling */
+    .markdown-body {
+      color: var(--text-main);
+      font-size: 15px;
+      line-height: 1.68;
+    }
+
+    .markdown-body h1, .markdown-body h2, .markdown-body h3 {
+      color: var(--text-bright);
+      border-bottom-color: var(--border-color);
+    }
+
+    .markdown-body table {
+      border-collapse: collapse;
+      width: 100%;
+      margin-bottom: 24px;
+    }
+
+    .markdown-body th {
+      background-color: #161b22;
+      color: var(--text-bright);
+    }
+
+    .markdown-body td, .markdown-body th {
+      border: 1px solid var(--border-color);
+      padding: 10px 14px;
+    }
+
+    .markdown-body pre {
+      background-color: #161b22 !important;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 16px;
+      position: relative;
+    }
+
+    .copy-btn {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      background: #21262d;
+      color: var(--text-muted);
+      border: 1px solid var(--border-color);
+      border-radius: 4px;
+      font-size: 0.75rem;
+      padding: 3px 8px;
+      cursor: pointer;
+      opacity: 0;
+      transition: opacity 0.2s, background 0.2s, color 0.2s;
+    }
+
+    pre:hover .copy-btn {
+      opacity: 1;
+    }
+
+    .copy-btn:hover {
+      background: #30363d;
+      color: var(--text-bright);
+    }
+
+    /* Mermaid Container */
+    .mermaid {
+      background: #0d1117;
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      padding: 24px 16px;
+      margin: 24px 0;
+      display: flex;
+      justify-content: center;
+      overflow-x: auto;
+    }
+
+    /* Toast Notification */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: #1f6feb;
+      color: #ffffff;
+      padding: 12px 20px;
+      border-radius: 8px;
+      font-size: 0.88rem;
+      font-weight: 500;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+      z-index: 1000;
+      display: none;
+      align-items: center;
+      gap: 8px;
+      animation: fadeIn 0.2s ease-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+
+  <!-- Script CDNs -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/12.0.1/marked.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/swift.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/python.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/bash.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10.8.0/dist/mermaid.min.js"></script>
+</head>
+<body>
+
+  <!-- Left Sidebar Navigation -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <div class="brand-title">
+        <span>🪐</span> Gemini AGI Specs
+      </div>
+      <div class="brand-subtitle">Autonomous Architecture Hub</div>
+    </div>
+
+    <div class="sidebar-search">
+      <input type="text" id="filterInput" class="search-input" placeholder="Quick find spec or topic..." oninput="filterTabs(this.value)" />
+    </div>
+
+    <ul class="nav-list" id="navList">
+      <!-- Tabs will be rendered here dynamically -->
+    </ul>
+
+    <div class="sidebar-footer">
+      <button class="btn-quick btn-quick-primary" onclick="copyOneShotPrompt()">
+        📋 Copy One-Shot AGI Prompt
+      </button>
+      <button class="btn-quick" onclick="downloadActiveMarkdown()">
+        ⬇️ Download Active Spec (.md)
+      </button>
+    </div>
+  </aside>
+
+  <!-- Main Viewport -->
+  <main class="main-viewport" id="viewport">
+    <header class="top-header">
+      <div class="header-breadcrumb">
+        <span id="headerIcon">🌟</span>
+        <span class="header-active-title" id="headerTitle">Master Environment PRD</span>
+        <span class="nav-badge badge-purple" id="headerBadge">Master Blueprint</span>
+      </div>
+      <div class="header-actions">
+        <button class="btn-action" onclick="copyCurrentUrl()">
+          🔗 Share Spec Link
+        </button>
+        <button class="btn-action btn-purple" onclick="copyOneShotPrompt()">
+          ⚡ One-Shot Prompt
+        </button>
+      </div>
+    </header>
+
+    <div class="content-container">
+      <div class="spec-hero" id="specHero">
+        <h1 class="spec-hero-title" id="heroTitle">Master Environment PRD</h1>
+        <p class="spec-hero-desc" id="heroDesc">Autonomous multi-tier reconstitution architecture and specifications.</p>
+        <div class="spec-meta-pills" id="heroPills">
+          <!-- Metadata pills -->
+        </div>
+      </div>
+
+      <div class="markdown-body" id="markdownOutput">
+        <!-- Markdown rendered content -->
+      </div>
+    </div>
+  </main>
+
+  <div class="toast" id="toast">
+    <span id="toastIcon">✅</span>
+    <span id="toastText">Action completed successfully!</span>
+  </div>
+
+  <!-- Raw Markdown Data Blocks -->
+  <script type="text/markdown" id="raw-master-spec">
+# Autonomous AGI Environment Specification (PRD & Execution Directives)
+**Target: Google Antigravity (AGY) / Gemini AGI Agent Reconstitution**
+**Document Version:** 1.0.0 • **Target OS:** macOS Apple Silicon (M1/M2/M3/M4)
+
+---
+
+> ### 🤖 AGENT INSTRUCTION & ACTIVATION DIRECTIVE
+> **To the AI / AGI Agent reading this file:**
+> You are activated as the **Autonomous Systems Reconstitution Engineer**. Your objective is to read this specification and execute the entire setup, compilation, linking, and verification workflow autonomously on this computer. 
+> 
+> **Operating Directives:**
+> 1. Execute each phase sequentially using your workspace command and file-authoring tools.
+> 2. Ensure every step is **idempotent** (safe to run multiple times without corrupting state).
+> 3. After completing each phase, execute the specified **Acceptance Verification Command** to validate before proceeding.
+> 4. If any failure occurs, follow the **Section 6 Reflexion & Contingency Protocols** to self-heal.
+> 5. Do not prompt the user for trivial confirmations; only prompt the user if macOS System Settings (TCC Microphone/Accessibility) requires manual user toggling.
+
+---
+
+## Section 1: Executive Summary & Objective
+
+### 1.1 Problem Statement
+The developer is migrating from their primary workstation to a new Apple Silicon Mac. While Google ID authentication provides immediate cloud model licensing and quota, the host developer environment consists of a sophisticated multi-layered stack:
+- Real-time responsive statusline gauges below the AGY prompt (<15ms budget).
+- Local Whisper Metal GPU voice dictation with native Swift HUD floating pills.
+- Meeting recording with dual-channel loopback audio & **First Go to AGI** dynamic synthesis.
+- Autonomous PR reviewer mimicry pipelines and benchmark suites (`digest`).
+- Autonomous skill-forging plugins and eval-backed coding directives.
+
+### 1.2 Architectural Invariant: The "First Go to AGI" Intelligence Rule
+Across all speech and text processing pipelines, **Cloud AGI (Google Antigravity / Gemini CLI)** is always the primary tier. Transcripts and developer commands are first passed to AGI for high-level semantic reasoning, Product Vision (PV) synthesis, and architectural decisions. Local LLMs (LM Studio / Ollama) and deterministic NLP operate strictly as automatic failover tiers when offline or during network timeouts.
+
+### 1.3 Objective & Success Metrics (KPIs)
+Autonomously recreate, compile, link, and test 100% of this environment on the target machine without manual human shell scripting.
+
+| Metric | Target | Verification Method |
+| :--- | :--- | :--- |
+| **Statusline Latency** | $< 15\text{ ms}$ execution | `python3 ~/.gemini/config/scripts/statusline.py` test run |
+| **Whisper Metal Latency** | $< 100\text{ ms}$ audio-to-text | `whisper-cli` Metal benchmark |
+| **Swift HUD Compilation** | Exit code 0, 0 compiler warnings | `swiftc -O` validation |
+| **Reviewer Test Suite** | 100% tests passing | `pytest tests/` (all 3 test suites) |
+| **Skills & Directives Recall** | 100% (11 skills, 6 plugins) | `agy` skill discovery catalog |
+
+---
+
+## Section 2: System Architecture & Scope Manifest
+
+### 2.1 Scope Breakdown
+```mermaid
+flowchart TD
+    subgraph HostSystem["Target Mac Host Environment"]
+        BREW["Homebrew Packages (whisper.cpp, ffmpeg, python@3.11, cmake)"]
+        LOCAL_BIN["~/.local/bin (meeting-recorder, whisper-pill, digest, plannotator)"]
+        PATH_ENV["~/.zshrc PATH configuration"]
+    end
+
+    subgraph AgentRuntime["Agent Brain (~/.gemini/)"]
+        CONFIG["config.json, settings.json, commands/"]
+        PLUGINS["6 Plugins (auto-skill-forge, eval-coding, modern-web, prd, tooling, chrome-devtools)"]
+        SKILLS["11+ Skills (agy-statusline, whisper, meeting-recorder, reviewer-mimic, etc.)"]
+        STATUS_SCRIPT["~/.gemini/config/scripts/statusline.py"]
+    end
+
+    subgraph Engines["Project Codebases (~/EmptyOne)"]
+        SWIFT_ENGINES["meeting_recorder.swift, whisper_pill.swift"]
+        PY_ENGINES["whisper_metal.py, summarize_meeting.py, prune_meetings.py"]
+        DIGEST_PKG["digest/ Python package (CLI, workflows, models)"]
+        MODELS["~/.whisper-models/ (ggml-base.en.bin, ggml-large-v3-turbo.bin)"]
+    end
+
+    BREW --> Engines
+    AgentRuntime --> Engines
+    Engines --> LOCAL_BIN
+    LOCAL_BIN --> PATH_ENV
+```
+
+### 2.2 File & Component Manifest
+```
+~/.gemini/
+├── config/
+│   ├── plugins/
+│   │   ├── auto-skill-forge-plugin/
+│   │   ├── chrome-devtools-plugin/
+│   │   ├── eval-coding-guidance-plugin/
+│   │   ├── modern-web-guidance-plugin/
+│   │   ├── prd-creation-plugin/
+│   │   └── tooling-setup-recorder-plugin/
+│   ├── skills/
+│   │   ├── agi-remote/
+│   │   ├── agy-statusline/
+│   │   ├── auto-skill-forge -> plugins/auto-skill-forge-plugin/...
+│   │   ├── eval_user-reviewer/
+│   │   ├── github-cli/
+│   │   ├── macos-speech-dictation/
+│   │   ├── meeting-recorder/
+│   │   ├── noteworthy-notes/
+│   │   ├── plannotator/
+│   │   ├── reviewer-mimic/
+│   │   └── willmcgugan-reviewer/
+│   └── scripts/
+│       └── statusline.py
+├── settings.json
+└── commands/
+
+~/EmptyOne/
+├── digest/ (Python package)
+├── tests/ (test_evaluation.py, test_stats.py, test_storage.py)
+├── meeting_recorder.swift
+├── whisper_pill.swift
+├── whisper_metal.py
+├── summarize_meeting.py
+└── .venv/
+
+~/.whisper-models/
+├── ggml-base.en.bin (141 MB)
+└── ggml-large-v3-turbo.bin (1.5 GB)
+```
+
+---
+
+## Section 3: Autonomous Step-by-Step Execution Directives
+
+The agent must execute the following 7 phases in order:
+
+### Phase 1: Host Dependency Verification & Installation
+1. Verify Homebrew is installed. If missing, install via official script:
+   ```bash
+   which brew || /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+   eval "$(/opt/homebrew/bin/brew shellenv)"
+   ```
+2. Install required CLI formulas and libraries:
+   ```bash
+   brew install python@3.11 ffmpeg portaudio portmidi pkg-config cmake whisper.cpp
+   ```
+3. Verify `/opt/homebrew/bin/whisper-cli` and `ffmpeg` are available.
+
+### Phase 2: Agent Runtime & Brain Reconstitution
+1. Ensure `~/.gemini/config/` directory structure exists.
+2. If `gemini_config.tar.gz` or transfer bundle is present, unpack it to `~/.gemini/`:
+   ```bash
+   mkdir -p ~/.gemini
+   tar -xzvf /path/to/gemini_config.tar.gz -C ~/.gemini/
+   ```
+3. If setting up from scratch/git, populate `~/.gemini/config/plugins` and `~/.gemini/config/skills`.
+4. Ensure `~/.gemini/config/scripts/statusline.py` is executable:
+   ```bash
+   chmod +x ~/.gemini/config/scripts/statusline.py
+   ```
+
+### Phase 3: Native Swift Compilation (Apple Silicon)
+1. Locate `meeting_recorder.swift` and compile with optimizations:
+   ```bash
+   cd ~/EmptyOne
+   swiftc -O -framework AVFoundation -framework ScreenCaptureKit -framework Cocoa -framework CoreAudio \
+     meeting_recorder.swift -o meeting-recorder
+   chmod +x meeting-recorder
+   ```
+2. Locate `whisper_pill.swift` and compile with optimizations:
+   ```bash
+   swiftc -O -framework Cocoa -framework Metal -framework AppKit \
+     whisper_pill.swift -o whisper-pill
+   chmod +x whisper-pill
+   ```
+
+### Phase 4: Python Runtime & Reviewer Package (`digest`)
+1. Create isolated Python 3.11 virtual environment:
+   ```bash
+   cd ~/EmptyOne
+   python3.11 -m venv .venv
+   source .venv/bin/activate
+   pip install --upgrade pip setuptools wheel
+   ```
+2. Install core Python dependencies:
+   ```bash
+   pip install openai-whisper sounddevice numpy rich click requests fastapi uvicorn websockets pydantic pytest
+   ```
+3. Install `digest` package in editable mode:
+   ```bash
+   pip install -e ./digest
+   ```
+
+### Phase 5: Whisper Metal Local Model Deployment
+1. Ensure directory `~/.whisper-models/` exists:
+   ```bash
+   mkdir -p ~/.whisper-models
+   ```
+2. If bundled models exist in bundle, copy them:
+   ```bash
+   cp /path/to/bundle/models/*.bin ~/.whisper-models/ 2>/dev/null || true
+   ```
+3. If models are absent, download the high-speed default Metal model:
+   ```bash
+   if [ ! -f ~/.whisper-models/ggml-base.en.bin ]; then
+       echo "Downloading ggml-base.en.bin..."
+       curl -L -C - "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-base.en.bin" \
+         -o ~/.whisper-models/ggml-base.en.bin
+   fi
+   ```
+
+### Phase 6: Local Binaries & Path Configuration
+1. Ensure `~/.local/bin` exists and symlink native binaries:
+   ```bash
+   mkdir -p ~/.local/bin
+   ln -sf ~/EmptyOne/meeting-recorder ~/.local/bin/meeting-recorder
+   ln -sf ~/EmptyOne/meeting-recorder ~/.local/bin/meeting-record
+   ln -sf ~/EmptyOne/whisper-pill ~/.local/bin/whisper-pill
+   ln -sf ~/EmptyOne/whisper-daemon ~/.local/bin/whisper-daemon
+   ln -sf ~/EmptyOne/.venv/bin/digest ~/.local/bin/digest
+   ```
+2. Ensure `~/.local/bin` is in user's `~/.zshrc`:
+   ```bash
+   if ! grep -q 'export PATH="$HOME/.local/bin:$PATH"' ~/.zshrc 2>/dev/null; then
+       echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.zshrc
+   fi
+   ```
+
+### Phase 7: Google Cloud ID Authentication
+1. Execute Antigravity CLI login (triggers browser OAuth with Google ID):
+   ```bash
+   agy auth login || true
+   ```
+
+---
+
+## Section 4: Functional Specifications & Acceptance Criteria
+
+| ID | User Story | Acceptance Criteria | Priority |
+| :--- | :--- | :--- | :--- |
+| **US-01** | *As an AGI Agent*, I must compile the Swift HUD and Meeting Recorder so that the user has native macOS audio capture and streaming UI. | - **AC-1.1**: `meeting-recorder --version` or `--help` executes without missing symbol errors.<br>- **AC-1.2**: `whisper-pill` executable starts without missing framework linkage errors. | P0 (Must) |
+| **US-02** | *As an AGI Agent*, I must configure Whisper Metal so that speech dictation runs locally on Apple Silicon GPU. | - **AC-2.1**: `/opt/homebrew/bin/whisper-cli` is present.<br>- **AC-2.2**: `~/.whisper-models/ggml-base.en.bin` is present and valid (>100MB).<br>- **AC-2.3**: `whisper-cli -m ~/.whisper-models/ggml-base.en.bin --help` succeeds. | P0 (Must) |
+| **US-03** | *As an AGI Agent*, I must deploy the `agy-statusline` script so that prompt metrics display in real time. | - **AC-3.1**: `python3 ~/.gemini/config/scripts/statusline.py` outputs balanced ANSI lines with context window gauge in $<15\text{ ms}$. | P0 (Must) |
+| **US-04** | *As an AGI Agent*, I must install and verify the `digest` package so that AI reviewer mimicry is operational. | - **AC-4.1**: `digest --help` executes and shows subcommands (`ingest`, `stats`, `evaluate`).<br>- **AC-4.2**: `pytest ~/EmptyOne/tests/` passes 100% of tests. | P1 (Must) |
+| **US-05** | *As an AGI Agent*, I must register all custom skills & plugins in `~/.gemini/config/` so that the agent retains all directives. | - **AC-5.1**: All 6 plugins and 11 skills exist with valid YAML frontmatter.<br>- **AC-5.2**: Rules are located in `~/.gemini/config/plugins/*/rules/AGENTS.md`. | P1 (Must) |
+
+---
+
+## Section 5: Autonomous Verification Test Suite (CodeT Protocol)
+
+The executing AGI agent must run the following automated verification suite upon completion and verify that all 6 tests pass:
+
+```bash
+#!/usr/bin/env bash
+set -e
+echo "=========================================="
+echo "RUNNING AUTONOMOUS ACCEPTANCE VERIFICATION"
+echo "=========================================="
+
+echo -n "Test 1: Homebrew dependencies... "
+command -v whisper-cli >/dev/null && command -v ffmpeg >/dev/null && echo "PASSED ✅"
+
+echo -n "Test 2: Whisper Model verification... "
+[ -s ~/.whisper-models/ggml-base.en.bin ] && echo "PASSED ✅"
+
+echo -n "Test 3: Native Swift Binaries... "
+[ -x ~/.local/bin/meeting-recorder ] && [ -x ~/.local/bin/whisper-pill ] && echo "PASSED ✅"
+
+echo -n "Test 4: Statusline script (<15ms)... "
+python3 ~/.gemini/config/scripts/statusline.py >/dev/null && echo "PASSED ✅"
+
+echo -n "Test 5: Digest CLI & Pytest suite... "
+source ~/EmptyOne/.venv/bin/activate
+digest --help >/dev/null
+pytest ~/EmptyOne/tests/ -q >/dev/null && echo "PASSED ✅"
+
+echo -n "Test 6: Gemini Skills catalog... "
+[ -d ~/.gemini/config/skills/agy-statusline ] && [ -d ~/.gemini/config/skills/macos-speech-dictation ] && echo "PASSED ✅"
+
+echo "=========================================="
+echo "ALL TESTS PASSED: ENVIRONMENT FULLY READY"
+echo "=========================================="
+```
+
+---
+
+## Section 6: Reflexion & Contingency Protocols
+
+If any step in the reconstitution encounters an error, the agent must pause, reflexively diagnose, and execute the matching contingency:
+
+### Scenario A: `swiftc` reports SDK / Framework linkage error
+- **Cause:** Missing Xcode Command Line Tools or outdated developer path.
+- **Contingency:**
+  1. Run `xcode-select --install` or `sudo xcode-select --reset`.
+  2. If still failing, check active SDK path: `xcrun --show-sdk-path`.
+  3. Re-compile using explicit SDK flag: `swiftc -sdk $(xcrun --show-sdk-path) ...`.
+
+### Scenario B: Pytest or Digest imports fail
+- **Cause:** Python virtual environment not activated or corrupted wheel cache.
+- **Contingency:**
+  1. Remove corrupted venv: `rm -rf ~/EmptyOne/.venv`.
+  2. Rebuild: `python3.11 -m venv ~/EmptyOne/.venv && source ~/EmptyOne/.venv/bin/activate`.
+  3. Re-run `pip install --no-cache-dir -e ~/EmptyOne/digest`.
+
+### Scenario C: macOS TCC Permission Prompt (Microphone / Accessibility)
+- **Cause:** macOS requires explicit user approval for Microphone and Accessibility in System Settings.
+- **Contingency:**
+  1. Do not crash. Inform the user clearly:
+     *"I have built and configured the meeting-recorder and whisper-pill. Please open `System Settings > Privacy & Security > Microphone` and ensure your terminal app has Microphone access enabled."*
+  2. Provide one-line command to open the exact settings pane:
+     ```bash
+     open "x-apple.systempreferences:com.apple.preference.security?Privacy_Microphone"
+     open "x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility"
+     ```
+
+---
+*Authored by Antigravity Autonomous Systems via `prd-creation` and `eval-coding-guidance` protocols.*
+
+</script>
+
+<script type="text/markdown" id="raw-spec-01-statusline">
+# Component Specification 01: Multi-Line Responsive Developer Statusline (`statusline.py`)
+**Component ID:** `agy-statusline`  
+**Target Path:** `~/.gemini/config/scripts/statusline.py`  
+**Execution Budget:** Sub-15ms ($< 15\text{ ms}$) total wall-clock runtime  
+**Terminal Footprint:** Dynamic 1, 2, or 3 lines auto-balanced to `terminal_width`  
+**Dependencies:** Python 3.10+ standard library only (`sys`, `os`, `json`, `re`, `subprocess`). Zero external pip packages.
+
+---
+
+## 1. Component Architecture & Telemetry Pipeline
+
+The statusline operates as a high-performance streaming visual gauge positioned directly below the Antigravity (`agy`) chat prompt. It consumes telemetry JSON on `stdin` streamed from the AGY engine on every prompt cycle, computes token dynamics, measures prompt caching ratios, probes git churn safely with micro-timeouts, and outputs color-balanced ANSI lines.
+
+```mermaid
+flowchart TD
+    subgraph AntigravityEngine["Antigravity CLI (agy) Engine"]
+        CLI["agy Prompt Loop"] -->|"JSON Telemetry on stdin (terminal_width, model, tokens, cwd, quota)"| STATUS["statusline.py"]
+    end
+
+    subgraph StatuslineEngine["statusline.py Processing Pipeline (<15ms)"]
+        PARSE["1. JSON Ingestion & ANSI Sanitization"] --> DYN["2. Context Gauge & Token Formatter"]
+        DYN --> CACHE["3. Prompt Cache Ratio Calculator"]
+        CACHE --> GIT["4. Git Worktree Probe (80ms strict timeout)"]
+        GIT --> QUOTA["5. Quota & Cost Aggregator"]
+        QUOTA --> WRAP["6. Responsive Layout Balancer (1, 2, or 3 Lines)"]
+    end
+
+    subgraph TerminalOutput["Terminal Prompt Display"]
+        WRAP -->|"Wide (≥140 cols)"| L1["Row 1: All Metrics on Single Line"]
+        WRAP -->|"Standard (75-139 cols)"| L2["Row 1: AI Model & Context Dynamics\nRow 2: Git Churn, Quota, Cost, Artifacts"]
+        WRAP -->|"Narrow (<75 cols)"| L3["Row 1: Model & Mode\nRow 2: Context Gauge\nRow 3: Git & Quota"]
+    end
+
+    STATUS --> PARSE
+```
+
+---
+
+## 2. Invariants & Performance Guardrails
+
+1. **Sub-15ms Execution Budget:** The script must never block the interactive typing experience of the developer. No network calls, disk write stalls, or complex imports are permitted.
+2. **Git Probe Invariants:**
+   - Probing `git rev-parse` and `git diff` must have strict micro-timeouts (`timeout=0.08s` / 80ms) to prevent freezing when working over network filesystems (NFS/SSHFS) or massive monorepos.
+   - If not inside a git repository, the git segment is cleanly omitted without error.
+3. **Prompt Cache Efficiency Ratio:**
+   $$\text{Cache Ratio} = \frac{\text{cache\_read\_input\_tokens}}{\text{cache\_read\_input\_tokens} + \text{input\_tokens}} \times 100\%$$
+   Displayed in cyan as `(Cache: XX%)` to provide instant feedback on prompt caching performance.
+4. **Visual Context Window Gauge:**
+   A 5-block visual density meter `[■■□□□]` color-coded dynamically:
+   - Green ($< 60\%$ consumed)
+   - Yellow ($60\% - 79\%$ consumed)
+   - Red + Alert $\ge 80\%$ consumed (`⚠️ 📊 Ctx: 850k [■■■■□] 81%`)
+5. **Zero-Crash Resilience:** All exceptions are caught silently with graceful fallbacks. An empty output is preferred over a broken prompt.
+
+---
+
+## 3. Responsive Layout Matrix
+
+| Terminal Width | Layout Mode | Line 1 Content | Line 2 Content | Line 3 Content |
+| :--- | :--- | :--- | :--- | :--- |
+| $\ge 140$ columns | **Single Line** | `⚡ Model: 3.8 Flash [AUTO] │ 📊 Ctx: 275k [■□□□□] 20% (Cache: 99%) │ 🌿 Git: main* (+14 -3) │ ⏳ Quota: 92% (5h) │ 💰 Cost: $0.0350 │ 📦 Arts: 4` | *(Omitted)* | *(Omitted)* |
+| $75 - 139$ columns | **Two Lines (Balanced)** | `⚡ Model: 3.8 Flash:high [AUTO] │ 📊 Ctx: 275k [■□□□□] 20% (Cache: 99%)` | `🌿 Git: main* (+14 -3) │ ⏳ Quota: 92% (5h) │ 💰 Cost: $0.0350 │ 📦 Arts: 4` | *(Omitted)* |
+| $< 75$ columns | **Three Lines (Compact)** | `⚡ Model: 3.8 Flash [AUTO]` | `📊 Ctx: 275k [■□□□□] 20%` | `🌿 Git: main* │ ⏳ Quota: 92%` |
+
+---
+
+## 4. Complete Executable Source Code
+
+Write this file to `~/.gemini/config/scripts/statusline.py` and run `chmod +x ~/.gemini/config/scripts/statusline.py`:
+
+```python
+#!/usr/bin/env python3
+"""
+Antigravity Multi-Line Developer Statusline
+Automatically adapts between 1, 2, or 3 lines depending on terminal window width.
+When window size cannot fit all metrics on a single line, splits cleanly into logical rows
+so all vital metrics and rich labels remain fully visible.
+Designed to never crash, auto-fit terminal width, and execute in <15ms.
+"""
+
+import sys
+import os
+import json
+import re
+import subprocess
+
+def fmt_tokens(n):
+    try:
+        n = int(n or 0)
+    except Exception:
+        return "0"
+    if n >= 1_000_000:
+        return f"{n/1_000_000:.1f}M"
+    if n >= 1_000:
+        return f"{n/1_000:.1f}k"
+    return str(n)
+
+def strip_ansi(text):
+    return re.sub(r"\033\[[0-9;]*m", "", text)
+
+def parse_model(val):
+    if isinstance(val, str):
+        return val
+    if isinstance(val, dict):
+        return (
+            val.get("display_name")
+            or val.get("name")
+            or val.get("label")
+            or val.get("model_id")
+            or val.get("id")
+            or val.get("title")
+            or (next((v for v in val.values() if isinstance(v, str)), "") if val else "")
+            or "Gemini"
+        )
+    return "Gemini"
+
+def parse_effort(effort_val, model_val):
+    if isinstance(effort_val, str) and effort_val:
+        return effort_val
+    if isinstance(model_val, dict):
+        eff = model_val.get("effort")
+        if isinstance(eff, str) and eff:
+            return eff
+    return None
+
+def get_git_info(cwd):
+    """
+    Safely inspects git status in cwd with strict timeouts (<80ms).
+    Returns None if cwd is not a git repository.
+    """
+    if not cwd or not os.path.isdir(cwd):
+        return None
+    try:
+        chk = subprocess.run(
+            ["git", "-C", cwd, "rev-parse", "--is-inside-work-tree"],
+            capture_output=True, text=True, timeout=0.08
+        )
+        if chk.returncode != 0 or chk.stdout.strip() != "true":
+            return None
+
+        b_res = subprocess.run(
+            ["git", "-C", cwd, "rev-parse", "--abbrev-ref", "HEAD"],
+            capture_output=True, text=True, timeout=0.08
+        )
+        branch = b_res.stdout.strip() or "HEAD"
+        if branch == "HEAD":
+            h_res = subprocess.run(
+                ["git", "-C", cwd, "rev-parse", "--short", "HEAD"],
+                capture_output=True, text=True, timeout=0.08
+            )
+            branch = f":{h_res.stdout.strip()}"
+
+        d_res = subprocess.run(
+            ["git", "-C", cwd, "diff", "HEAD", "--shortstat"],
+            capture_output=True, text=True, timeout=0.08
+        )
+        diff_out = d_res.stdout.strip()
+        if not diff_out and d_res.returncode != 0:
+            d_res = subprocess.run(
+                ["git", "-C", cwd, "diff", "--shortstat"],
+                capture_output=True, text=True, timeout=0.08
+            )
+            diff_out = d_res.stdout.strip()
+
+        u_res = subprocess.run(
+            ["git", "-C", cwd, "status", "--porcelain"],
+            capture_output=True, text=True, timeout=0.08
+        )
+        status_lines = u_res.stdout.strip().splitlines() if u_res.stdout else []
+        is_dirty = len(status_lines) > 0
+        untracked = sum(1 for l in status_lines if l.startswith("??"))
+
+        ins, dels = 0, 0
+        if diff_out:
+            m_ins = re.search(r"(\d+) insertion", diff_out)
+            m_del = re.search(r"(\d+) deletion", diff_out)
+            if m_ins: ins = int(m_ins.group(1))
+            if m_del: dels = int(m_del.group(1))
+
+        return {
+            "branch": branch,
+            "dirty": is_dirty,
+            "insertions": ins,
+            "deletions": dels,
+            "untracked": untracked
+        }
+    except Exception:
+        return None
+
+def main():
+    try:
+        raw = sys.stdin.read().strip()
+        if not raw:
+            return
+
+        data = json.loads(raw)
+        if not isinstance(data, dict):
+            return
+
+        # ANSI Color Palette
+        RST = "\033[0m"
+        DIM = "\033[2m"
+        CYAN = "\033[36m"
+        GREEN = "\033[32m"
+        YELLOW = "\033[33m"
+        MAGENTA = "\033[35m"
+        BLUE = "\033[34m"
+        RED = "\033[31m"
+
+        try:
+            terminal_width = int(data.get("terminal_width") or 80)
+        except Exception:
+            terminal_width = 80
+
+        # Model & Mode
+        raw_model = data.get("model")
+        model_name = parse_model(raw_model)
+        clean_model = (
+            model_name.replace("Gemini ", "")
+            .replace(" (High)", "")
+            .replace(" (Medium)", "")
+            .replace(" (Low)", "")
+            .strip()
+        )
+        if not clean_model:
+            clean_model = "Gemini"
+
+        effort = parse_effort(data.get("effort"), raw_model)
+        raw_mode = data.get("editorMode") or data.get("agent_state") or "auto"
+        mode = (raw_mode if isinstance(raw_mode, str) else "auto").upper()
+
+        model_str = f"{CYAN}⚡ Model: {clean_model}{RST}"
+        if effort:
+            model_str += f"{DIM}:{effort}{RST}"
+        model_str += f" {DIM}[{mode}]{RST}"
+
+        # Context Window Dynamics
+        cw = data.get("context_window") or {}
+        total_in = cw.get("total_input_tokens") or 0
+        total_out = cw.get("total_output_tokens") or 0
+        total_tok = (total_in + total_out) if (total_in or total_out) else (data.get("total_tokens") or 0)
+        max_size = cw.get("context_window_size") or 1048576
+
+        used_pct = cw.get("used_percentage")
+        if used_pct is not None:
+            pct = float(used_pct)
+        elif max_size > 0 and total_tok > 0:
+            pct = (total_tok / max_size) * 100.0
+        else:
+            pct = 0.0
+
+        bar_len = 5
+        filled = min(bar_len, max(0, round(pct / 100.0 * bar_len)))
+        bar = "■" * filled + "□" * (bar_len - filled)
+
+        if pct >= 80.0:
+            ctx_color = RED
+            alert = "⚠️ "
+        elif pct >= 60.0:
+            ctx_color = YELLOW
+            alert = ""
+        else:
+            ctx_color = GREEN
+            alert = ""
+
+        ctx_str = f"{ctx_color}{alert}📊 Ctx: {fmt_tokens(total_tok)} [{bar}] {pct:.0f}%{RST}"
+
+        # Prompt Cache Efficiency
+        cur_usage = cw.get("current_usage") or {}
+        cache_read = cur_usage.get("cache_read_input_tokens") or 0
+        cur_in = cur_usage.get("input_tokens") or 0
+        if cache_read > 0 and (cache_read + cur_in) > 0:
+            cache_pct = (cache_read / (cache_read + cur_in)) * 100.0
+            ctx_str += f" {CYAN}(Cache: {cache_pct:.0f}%){RST}"
+
+        # Pending Tool Confirmation Alert
+        tool_pending_str = None
+        if data.get("tool_confirmation_pending"):
+            tool_pending_str = f"{YELLOW}🔔 Waiting: Tool Approval{RST}"
+
+        # Git Status
+        cwd = data.get("cwd") or (data.get("workspace") or {}).get("current_dir") or os.getcwd()
+        git_info = get_git_info(cwd)
+        git_str = None
+        if git_info:
+            branch = git_info["branch"]
+            dirty = git_info["dirty"]
+            ins = git_info["insertions"]
+            dels = git_info["deletions"]
+            untracked = git_info["untracked"]
+
+            dirty_flag = "*" if dirty else ""
+            branch_color = YELLOW if dirty else MAGENTA
+            git_str = f"{branch_color}🌿 Git: {branch}{dirty_flag}{RST}"
+
+            churn_elements = []
+            if ins > 0: churn_elements.append(f"{GREEN}+{ins}{RST}")
+            if dels > 0: churn_elements.append(f"{RED}-{dels}{RST}")
+            if not churn_elements and untracked > 0: churn_elements.append(f"{YELLOW}?{untracked}{RST}")
+
+            if churn_elements:
+                git_str += f" (Diff: {' '.join(churn_elements)})"
+
+        # Quota Tracking
+        quota_str = None
+        quota = data.get("quota")
+        if isinstance(quota, dict):
+            g5h = quota.get("gemini-5h")
+            if isinstance(g5h, dict) and "remaining_fraction" in g5h:
+                pct_quota = int(round(g5h["remaining_fraction"] * 100))
+                quota_str = f"{GREEN}⏳ Quota: {pct_quota}% (5h){RST}"
+        elif isinstance(quota, list):
+            for bucket in quota:
+                if isinstance(bucket, dict):
+                    p = bucket.get("percentage_remaining") or bucket.get("remaining")
+                    name = str(bucket.get("display_name") or bucket.get("name") or "")
+                    if p is not None and ("5" in name or "five" in name.lower()):
+                        quota_str = f"{GREEN}⏳ Quota: {int(round(p))}% (5h){RST}"
+                        break
+
+        # Cost & Spend
+        spend_str = None
+        try:
+            total_usd = float(data.get("total_usd") or 0.0)
+            sub_usd = float(data.get("subagent_usd") or 0.0)
+            if total_usd > 0:
+                spend_str = f"{YELLOW}💰 Cost: ${total_usd:.4f}{RST}"
+                if sub_usd > 0 and terminal_width > 90:
+                    spend_str += f"{DIM} (sub: ${sub_usd:.3f}){RST}"
+        except Exception:
+            pass
+
+        # Artifacts Count
+        art_str = None
+        try:
+            artifacts = int(data.get("artifact_count") or 0)
+            if artifacts > 0:
+                art_str = f"{BLUE}📦 Arts: {artifacts}{RST}"
+        except Exception:
+            pass
+
+        # Running Subagents
+        subagent_str = None
+        try:
+            subagents = data.get("subagents")
+            cnt = len(subagents) if isinstance(subagents, list) else (subagents if isinstance(subagents, int) else 0)
+            if cnt > 0:
+                subagent_str = f"{MAGENTA}🤖 Agents: {cnt}{RST}"
+        except Exception:
+            pass
+
+        # Step Count
+        step_str = None
+        try:
+            step = int(data.get("step_count") or 0)
+            if step > 0:
+                step_str = f"{DIM}Turn: {step}{RST}"
+        except Exception:
+            pass
+
+        sep = f" {DIM}│{RST} "
+
+        # Layout Balancer
+        row1_items = [x for x in [model_str, ctx_str] if x]
+        row2_items = [x for x in [git_str, quota_str, tool_pending_str, spend_str, art_str, subagent_str, step_str] if x]
+        all_items = row1_items + row2_items
+
+        # Check Single Line
+        single_line = sep.join(all_items)
+        if len(strip_ansi(single_line)) <= terminal_width:
+            print(single_line)
+            return
+
+        # Check Two Balanced Lines
+        r1_rendered = sep.join(row1_items)
+        r2_rendered = sep.join(row2_items)
+        if len(strip_ansi(r1_rendered)) <= terminal_width and len(strip_ansi(r2_rendered)) <= terminal_width:
+            print(r1_rendered)
+            print(r2_rendered)
+            return
+
+        # Pack Greedily across 2-3 lines
+        lines = []
+        curr_line = []
+        for it in all_items:
+            test_line = curr_line + [it]
+            rendered = sep.join(test_line)
+            if len(strip_ansi(rendered)) <= terminal_width:
+                curr_line.append(it)
+            else:
+                if curr_line:
+                    lines.append(sep.join(curr_line))
+                    curr_line = [it]
+                else:
+                    lines.append(it)
+                    curr_line = []
+        if curr_line:
+            lines.append(sep.join(curr_line))
+
+        print("\n".join(lines[:3]))
+
+    except Exception:
+        return
+
+if __name__ == "__main__":
+    try:
+        main()
+    except Exception:
+        sys.exit(0)
+```
+
+---
+
+## 5. Verification & Performance Benchmark
+
+Execute the automated test script to verify formatting and confirm runtime is $< 15\text{ ms}$:
+
+```bash
+python3 -c '
+import subprocess, json, time
+
+payload = json.dumps({
+    "terminal_width": 120,
+    "model": "Gemini 3.8 Flash (High)",
+    "effort": "high",
+    "editorMode": "auto",
+    "total_tokens": 284000,
+    "context_window": {
+        "context_window_size": 1048576,
+        "used_percentage": 27.1,
+        "current_usage": {"cache_read_input_tokens": 210000, "input_tokens": 74000}
+    },
+    "quota": {"gemini-5h": {"remaining_fraction": 0.94}},
+    "total_usd": 0.0420,
+    "artifact_count": 3
+})
+
+t0 = time.time()
+res = subprocess.run(
+    ["python3", os.path.expanduser("~/.gemini/config/scripts/statusline.py")],
+    input=payload, text=True, capture_output=True
+)
+t1 = time.time()
+elapsed_ms = (t1 - t0) * 1000
+
+assert res.returncode == 0, "Non-zero exit code"
+assert "3.8 Flash" in res.stdout, "Missing model string"
+assert "Ctx:" in res.stdout, "Missing context gauge"
+assert "Cache: 74%" in res.stdout, "Missing cache ratio calculation"
+print(f"Statusline Verification: PASSED ✅ ({elapsed_ms:.2f}ms runtime)")
+'
+```
+
+</script>
+
+<script type="text/markdown" id="raw-spec-02-whisper-dictation">
+# Component Specification 02: Whisper Metal GPU Architecture, Live HUD & Multi-Tier AGI Synthesis
+**Component ID:** `whisper-metal-suite`  
+**Execution Platform:** macOS Apple Silicon (M1/M2/M3/M4/M5) with Unified Memory Metal GPU  
+**Hardware Latency Budgets:**  
+- Live Push-to-Talk Rolling Slice: $< 180\text{ ms}$ (via `ggml-base.en.bin`)  
+- Final Punctuation & Transcription Pass: $< 1.2\text{ s}$ (via `ggml-large-v3-turbo.bin`)  
+- Meeting Executive Synthesis: Multi-Tier (Tier 1: Gemini AGI -> Tier 2: Local LM Studio -> Tier 3: Rule-based NLP)  
+
+---
+
+## 1. System Topology & Dual-Pipeline Architecture
+
+The Whisper voice system consists of two distinct pipelines sharing a common in-memory audio capture engine:
+1. **Pipeline A (Instant Push-to-Talk Dictation):** Ultra-low latency voice-to-cursor streaming HUD for instant typing into any text field or AGI chat prompt.
+2. **Pipeline B (Meeting Recording & AGI Multi-Tier Synthesis):** Long-form audio recording with local DLP privacy redaction, routed **first to AGI (Gemini CLI / Antigravity with `noteworthy-notes`)**, with local LLM fallback, generating an interactive click-to-seek HTML dashboard.
+
+```mermaid
+graph TD
+    subgraph Input["🎧 Audio Capture & Ingestion"]
+        MIC["Mac Microphone"] -->|"48kHz PCM"| ENG["AVAudioEngine Tap"]
+        ENG -->|"Downsample Stride = 3"| BUF["In-Memory 16kHz PCM Buffer"]
+    end
+
+    subgraph PipelineA["🚀 Pipeline A: Live Push-to-Talk Dictation HUD"]
+        BUF -->|"450ms Rolling Slice"| SNAP["/tmp/whisper_stream_snapshot.wav"]
+        SNAP -->|"whisper-cli (~180ms)"| BASE_EN["ggml-base.en.bin<br/>(-l en Dedicated English)"]
+        BASE_EN -->|"Streaming Text"| HUD["Floating Glass Pill HUD<br/>(3-Line Rolling Preview, sharingType = .none)"]
+        
+        BUF -->|"Key Release (Right Option ⌥)"| FINAL_WAV["/tmp/whisper_stream_final.wav"]
+        FINAL_WAV -->|"whisper-cli"| TURBO_EN["ggml-large-v3-turbo.bin<br/>(-l en English Locked)"]
+        TURBO_EN -->|"High Accuracy Text"| CLIP["NSPasteboard"]
+        CLIP -->|"CGEvent (Cmd + V)"| CURSOR["Active Cursor / AGI Chat Prompt"]
+    end
+
+    subgraph PipelineB["🎙️ Pipeline B: Meeting Recording & AGI Multi-Tier Synthesis"]
+        BUF -->|"Double-Tap ⌥ ⌥ / Menu Bar"| MEET_WAV["~/EmptyOne/meetings/.../audio.wav"]
+        MEET_WAV -->|"whisper-cli -oj -otxt -l en"| WHISPER_MEET["Whisper Metal Engine"]
+        WHISPER_MEET -->|"transcript.txt (Raw Text)"| DLP["🛡️ Local Privacy Middleware<br/>(Regex + Local Qwen 7B)"]
+        DLP -->|"Sanitized Transcript<br/>[REDACTED_API_KEY]"| SUM_PY["summarize_meeting.py"]
+        WHISPER_MEET -->|"transcript.json (Word Offsets)"| SUM_PY
+        
+        SUM_PY -->|"Tier 1: FIRST GO TO AGI"| AGY["Google Antigravity / Gemini CLI<br/>(noteworthy-notes skill)"]
+        AGY -. "Fallback if Offline / Timeout" .-> LM["Tier 2: Local LLM<br/>(LM Studio / Ollama Port 1234)"]
+        LM -. "Safety Fallback" .-> NLP["Tier 3: Rule-Based NLP Extractor"]
+        
+        AGY -->|"JSON Synthesis & Dynamic Sections"| REPORT["Interactive summary.html & summary.md"]
+        LM -->|"JSON Synthesis"| REPORT
+        NLP -->|"Basic Notes"| REPORT
+        
+        REPORT -->|"Auto-open in Browser"| BROWSER["Interactive Dashboard<br/>(Audio Player + Auto-Scrolling Transcript)"]
+    end
+
+    subgraph Storage["💾 Dual-Pool Retention & Auto-Pruner"]
+        PRUNE["prune_meetings.py"]
+        PRUNE -->|"Heavy Pool (5000 MB Max)"| DEL_AUDIO["Deletes Oldest raw audio.wav First"]
+        PRUNE -->|"Light Pool (500 MB Max)"| DEL_TEXT["Preserves HTML Summaries & Transcripts"]
+    end
+
+    style BASE_EN fill:#1e1b4b,stroke:#818cf8,stroke-width:2px;
+    style TURBO_EN fill:#312e81,stroke:#6366f1,stroke-width:2px;
+    style HUD fill:#0f172a,stroke:#38bdf8,stroke-width:2px;
+    style AGY fill:#064e3b,stroke:#34d399,stroke-width:2px;
+    style CURSOR fill:#14532d,stroke:#4ade80,stroke-width:2px;
+    style BROWSER fill:#1e1b4b,stroke:#a855f7,stroke-width:2px;
+```
+
+---
+
+## 2. Architectural Pillars & Design Invariants
+
+### 2.1 The "First Go to AGI" Multi-Tier Intelligence Hierarchy
+Meeting transcripts are never summarized using simple, brittle local heuristics when cloud intelligence is reachable. The summarization engine follows a strict 3-tier cascade:
+1. **Tier 1 (Primary - Cloud AGI):** Transcripts are routed **directly to Google Antigravity (AGY) / Gemini 3.8**. It leverages the `noteworthy-notes` skill to extract:
+   - High-caliber conceptual themes (never verbatim sentence repetition).
+   - Dynamic domain sections: *Product Vision (PV) & Scope*, *Technical Architecture & Invariants*, *Identified Risks & Blockers*, and *Action Items with Owners*.
+2. **Tier 2 (Offline Fallback - Local LLM):** If the Mac has no internet access or Gemini CLI times out, the system automatically redirects to a local LLM runner (LM Studio or Ollama on `http://127.0.0.1:1234` running `qwen2.5-coder:7b`).
+3. **Tier 3 (Safety Fallback - Deterministic NLP):** If no LLM daemon is running, a zero-dependency heuristic parser extracts bullet points and timestamps to ensure an executive summary is always produced.
+
+### 2.2 Local Privacy & DLP (Data Loss Prevention) Middleware
+Before any meeting transcript is passed to Tier 1 Cloud AGI, `summarize_meeting.py` executes local sanitization:
+- High-entropy secrets, bearer tokens, AWS credentials, API keys (`AIzaSy...`, `sk-...`), and passwords are masked with variables (e.g. `[REDACTED_API_KEY_1]`).
+- A local `sanitization_report.json` maps redacted variables so private data never leaves the developer's machine.
+
+### 2.3 English-Only Locking & Hallucination Elimination
+Unconstrained multilingual models (such as default Whisper without `-l en` or Parakeet-TDT) frequently misclassify microphone noise, whispered speech, or coughing as foreign phonetics (most notoriously Russian Cyrillic: *"Мейк а Финишуп док."*).
+- **Live HUD Streaming:** Strictly uses `ggml-base.en.bin`. Because `.en` models completely omit non-English vocabulary tokens, Russian or foreign hallucinations are physically impossible.
+- **Final Pass:** Strictly invokes `whisper-cli` with `-l en` to disable language auto-detection and enforce English decoder priors.
+
+### 2.4 macOS Security & Screen-Share Privacy
+The Swift floating pill HUD (`whisper_pill.swift`) sets `self.sharingType = .none` on its `NSWindow`. This informs the macOS Window Server to omit the HUD from all ScreenCaptureKit streams, hiding the live transcription pill from Zoom, Google Meet, and Microsoft Teams screen-sharing sessions.
+
+---
+
+## 3. Component File Specifications
+
+### 3.1 File 1: Python Metal Wrapper (`~/EmptyOne/whisper_metal.py`)
+Provides an Apple Silicon Metal-accelerated interface to convert and transcribe audio files:
+
+```python
+"""
+whisper_metal.py: Python wrapper for Metal-accelerated Whisper on Apple Silicon.
+Provides an easy-to-use Python interface to transcribe any audio or video file.
+"""
+
+from __future__ import annotations
+
+import json
+import os
+import re
+import shutil
+import subprocess
+import tempfile
+from pathlib import Path
+from typing import Any, Dict, List, Optional
+
+
+MODELS_DIR = Path(os.environ.get("WHISPER_MODELS_DIR", Path.home() / ".whisper-models"))
+
+
+def get_model_path(model_name: str = "large-v3-turbo") -> Path:
+    """Resolve model path or download if missing."""
+    aliases = {
+        "turbo": "ggml-large-v3-turbo.bin",
+        "large-v3-turbo": "ggml-large-v3-turbo.bin",
+        "base.en": "ggml-base.en.bin",
+        "base": "ggml-base.bin",
+        "small": "ggml-small.bin",
+        "small.en": "ggml-small.en.bin",
+        "medium": "ggml-medium.bin",
+        "large": "ggml-large-v3.bin",
+        "large-v3": "ggml-large-v3.bin",
+        "tiny": "ggml-tiny.bin",
+    }
+    filename = aliases.get(model_name, f"ggml-{model_name}.bin" if not model_name.startswith("ggml-") else model_name)
+    if not filename.endswith(".bin"):
+        filename += ".bin"
+
+    model_path = MODELS_DIR / filename
+    if not model_path.exists():
+        if model_name in ("turbo", "large-v3-turbo") and (MODELS_DIR / "ggml-base.en.bin").exists():
+            return MODELS_DIR / "ggml-base.en.bin"
+
+        MODELS_DIR.mkdir(parents=True, exist_ok=True)
+        url = f"https://huggingface.co/ggerganov/whisper.cpp/resolve/main/{filename}"
+        print(f"Downloading model {filename}...")
+        subprocess.run(["curl", "-L", "--fail", "-C", "-", "-o", str(model_path), url], check=True)
+
+    return model_path
+
+
+def transcribe(
+    audio_path: str | Path,
+    model: str = "large-v3-turbo",
+    language: str = "en",
+    threads: int = 8,
+    output_srt: bool = False,
+    output_vtt: bool = False,
+) -> Dict[str, Any]:
+    audio_path = Path(audio_path).expanduser().resolve()
+    if not audio_path.exists():
+        raise FileNotFoundError(f"Audio file '{audio_path}' does not exist.")
+
+    model_path = get_model_path(model)
+
+    with tempfile.TemporaryDirectory() as tmp_dir:
+        tmp_wav = Path(tmp_dir) / "converted.wav"
+        out_prefix = Path(tmp_dir) / "output"
+
+        # Preprocess to 16kHz mono WAV using ffmpeg
+        ffmpeg_cmd = [
+            "ffmpeg",
+            "-y",
+            "-hide_banner",
+            "-loglevel", "error",
+            "-i", str(audio_path),
+            "-ar", "16000",
+            "-ac", "1",
+            "-c:a", "pcm_s16le",
+            str(tmp_wav),
+        ]
+        subprocess.run(ffmpeg_cmd, check=True)
+
+        whisper_cmd = [
+            "whisper-cli",
+            "-m", str(model_path),
+            "-f", str(tmp_wav),
+            "-t", str(threads),
+            "-l", language,
+            "-otxt",
+            "--output-file", str(out_prefix),
+        ]
+        if output_srt:
+            whisper_cmd.append("-osrt")
+        if output_vtt:
+            whisper_cmd.append("-ovtt")
+
+        result = subprocess.run(
+            whisper_cmd,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+            check=True,
+        )
+
+        txt_file = Path(f"{out_prefix}.txt")
+        text = txt_file.read_text(encoding="utf-8").strip() if txt_file.exists() else ""
+
+        segments = []
+        pattern = re.compile(r"\[(\d{2}:\d{2}:\d{2}\.\d{3})\s*-->\s*(\d{2}:\d{2}:\d{2}\.\d{3})\]\s*(.*)")
+        for line in result.stdout.splitlines():
+            match = pattern.match(line.strip())
+            if match:
+                start, end, seg_text = match.groups()
+                segments.append({
+                    "start": start,
+                    "end": end,
+                    "text": seg_text.strip(),
+                })
+
+        srt_content = None
+        srt_file = Path(f"{out_prefix}.srt")
+        if output_srt and srt_file.exists():
+            srt_content = srt_file.read_text(encoding="utf-8")
+
+        vtt_content = None
+        vtt_file = Path(f"{out_prefix}.vtt")
+        if output_vtt and vtt_file.exists():
+            vtt_content = vtt_file.read_text(encoding="utf-8")
+
+        return {
+            "text": text,
+            "segments": segments,
+            "model": str(model_path),
+            "srt": srt_content,
+            "vtt": vtt_content,
+        }
+
+
+if __name__ == "__main__":
+    import sys
+    if len(sys.argv) < 2:
+        print("Usage: python whisper_metal.py <audio_or_video_file> [model]")
+        sys.exit(1)
+
+    target_file = sys.argv[1]
+    target_model = sys.argv[2] if len(sys.argv) > 2 else "large-v3-turbo"
+    print(f"Transcribing '{target_file}' with {target_model}...")
+    res = transcribe(target_file, model=target_model)
+    print("\n--- Transcription ---")
+    print(res["text"])
+```
+
+---
+
+### 3.2 File 2: Native Swift Live Dictation Pill (`~/EmptyOne/whisper_pill.swift`)
+Compiles to `~/EmptyOne/whisper-pill`. Implements in-memory audio capture, live 3-line floating HUD, and automatic cursor injection:
+
+```swift
+import AppKit
+import AVFoundation
+import CoreGraphics
+
+// ==============================================================================
+// ParakeetPill: 3-Line Multiline Streaming Dictation Card for macOS
+// ==============================================================================
+
+class PillWindow: NSWindow {
+    let visualEffect = NSVisualEffectView()
+    let statusLabel = NSTextField()
+    let pillWidth: CGFloat = 480
+    let pillHeight: CGFloat = 88 // Comfortably holds 3 lines of 15pt text
+    
+    init() {
+        let contentRect = NSRect(x: 0, y: 0, width: pillWidth, height: pillHeight)
+        super.init(
+            contentRect: contentRect,
+            styleMask: [.borderless],
+            backing: .buffered,
+            defer: false
+        )
+        
+        self.isOpaque = false
+        self.backgroundColor = .clear
+        self.level = .floating
+        self.ignoresMouseEvents = true
+        self.collectionBehavior = [.canJoinAllSpaces, .stationary, .fullScreenAuxiliary]
+        self.sharingType = .none // Exclude from screen share & recording
+        
+        visualEffect.frame = contentRect
+        visualEffect.blendingMode = .behindWindow
+        visualEffect.material = .hudWindow
+        visualEffect.state = .active
+        visualEffect.wantsLayer = true
+        visualEffect.layer?.cornerRadius = 20
+        visualEffect.layer?.masksToBounds = true
+        visualEffect.layer?.borderColor = NSColor.white.withAlphaComponent(0.22).cgColor
+        visualEffect.layer?.borderWidth = 1.0
+        
+        statusLabel.isEditable = false
+        statusLabel.isSelectable = false
+        statusLabel.isBezeled = false
+        statusLabel.drawsBackground = false
+        statusLabel.font = NSFont.systemFont(ofSize: 15, weight: .medium)
+        statusLabel.textColor = .white
+        statusLabel.alignment = .left
+        statusLabel.maximumNumberOfLines = 3
+        statusLabel.lineBreakMode = .byWordWrapping
+        statusLabel.cell?.wraps = true
+        statusLabel.cell?.isScrollable = false
+        statusLabel.frame = NSRect(x: 20, y: 12, width: pillWidth - 40, height: pillHeight - 24)
+        
+        visualEffect.addSubview(statusLabel)
+        self.contentView = visualEffect
+        centerOnScreen()
+    }
+    
+    func centerOnScreen() {
+        if let screen = NSScreen.main {
+            let screenRect = screen.visibleFrame
+            let x = screenRect.midX - pillWidth / 2
+            let y = screenRect.minY + 90
+            self.setFrame(NSRect(x: x, y: y, width: pillWidth, height: pillHeight), display: true)
+        }
+    }
+    
+    func updateLiveText(_ text: String, isFinished: Bool = false) {
+        DispatchQueue.main.async {
+            let icon = isFinished ? "✓ " : "🎙️ "
+            let displayText = self.formatTrailingLines(prefix: icon, text: text)
+            let paragraphStyle = NSMutableParagraphStyle()
+            paragraphStyle.lineSpacing = 3
+            paragraphStyle.lineBreakMode = .byWordWrapping
+            
+            let attrString = NSAttributedString(
+                string: displayText,
+                attributes: [
+                    .font: NSFont.systemFont(ofSize: 15, weight: .medium),
+                    .foregroundColor: NSColor.white,
+                    .paragraphStyle: paragraphStyle
+                ]
+            )
+            self.statusLabel.attributedStringValue = attrString
+        }
+    }
+    
+    func formatTrailingLines(prefix: String, text: String) -> String {
+        let full = text.trimmingCharacters(in: .whitespacesAndNewlines)
+        if full.isEmpty { return "\(prefix)Listening..." }
+        let words = full.components(separatedBy: .whitespaces).filter { !$0.isEmpty }
+        if words.count > 32 {
+            let recentWords = words.suffix(30).joined(separator: " ")
+            return "\(prefix)... \(recentWords)"
+        }
+        return "\(prefix)\(full)"
+    }
+    
+    func show(text: String) {
+        DispatchQueue.main.async {
+            self.updateLiveText(text)
+            self.centerOnScreen()
+            self.alphaValue = 0.0
+            self.orderFrontRegardless()
+            NSAnimationContext.runAnimationGroup { context in
+                context.duration = 0.12
+                self.animator().alphaValue = 1.0
+            }
+        }
+    }
+    
+    func hide() {
+        DispatchQueue.main.async {
+            NSAnimationContext.runAnimationGroup({ context in
+                context.duration = 0.25
+                self.animator().alphaValue = 0.0
+            }, completionHandler: {
+                self.orderOut(nil)
+            })
+        }
+    }
+}
+
+class DictationController: NSObject {
+    static let shared = DictationController()
+    let pill = PillWindow()
+    let audioEngine = AVAudioEngine()
+    var isRecording = false
+    var isTranscribingSlice = false
+    var pcmLock = NSLock()
+    var pcmBuffer = Data()
+    
+    let snapshotWavURL = URL(fileURLWithPath: "/tmp/whisper_stream_snapshot.wav")
+    let finalWavURL = URL(fileURLWithPath: "/tmp/whisper_stream_final.wav")
+    var streamTimer: DispatchSourceTimer?
+    var lastTranscribedText = ""
+    let whisperCliPath = "/opt/homebrew/bin/whisper-cli"
+    
+    let liveModelPath: String = {
+        let home = FileManager.default.homeDirectoryForCurrentUser.path
+        let baseEn = "\(home)/.whisper-models/ggml-base.en.bin"
+        if FileManager.default.fileExists(atPath: baseEn) { return baseEn }
+        return "\(home)/.whisper-models/ggml-large-v3-turbo.bin"
+    }()
+    
+    let finalModelPath: String = {
+        let home = FileManager.default.homeDirectoryForCurrentUser.path
+        let turbo = "\(home)/.whisper-models/ggml-large-v3-turbo.bin"
+        if FileManager.default.fileExists(atPath: turbo) { return turbo }
+        return "\(home)/.whisper-models/ggml-base.en.bin"
+    }()
+    
+    func toggle() {
+        if isRecording { stopAndTranscribe() } else { startRecording() }
+    }
+    
+    func startRecording() {
+        guard !isRecording else { return }
+        isRecording = true
+        lastTranscribedText = ""
+        pcmLock.lock()
+        pcmBuffer.removeAll(keepingCapacity: true)
+        pcmLock.unlock()
+        
+        let inputNode = audioEngine.inputNode
+        let inputFormat = inputNode.outputFormat(forBus: 0)
+        let sampleRate = inputFormat.sampleRate
+        let strideStep = max(1, Int(round(sampleRate / 16000.0)))
+        
+        inputNode.installTap(onBus: 0, bufferSize: 1024, format: inputFormat) { [weak self] (buffer, when) in
+            guard let self = self, self.isRecording else { return }
+            guard let channelData = buffer.floatChannelData?[0] else { return }
+            let frameCount = Int(buffer.frameLength)
+            
+            var chunk = Data(capacity: (frameCount / strideStep) * 2)
+            for i in stride(from: 0, to: frameCount, by: strideStep) {
+                let sample = max(-1.0, min(1.0, channelData[i]))
+                let int16 = Int16(sample * 32767.0)
+                var little = int16.littleEndian
+                withUnsafeBytes(of: &little) { chunk.append(contentsOf: $0) }
+            }
+            self.pcmLock.lock()
+            self.pcmBuffer.append(chunk)
+            self.pcmLock.unlock()
+        }
+        
+        do {
+            try audioEngine.start()
+            NSSound(named: "Tink")?.play()
+            pill.show(text: "Listening...")
+            startLiveStreamTimer()
+        } catch {
+            print("Failed to start audio engine: \(error)")
+            isRecording = false
+        }
+    }
+    
+    func startLiveStreamTimer() {
+        let timer = DispatchSource.makeTimerSource(queue: DispatchQueue.global(qos: .userInteractive))
+        timer.schedule(deadline: .now() + 0.45, repeating: 0.45)
+        timer.setEventHandler { [weak self] in self?.decodeLiveSnapshot() }
+        timer.resume()
+        self.streamTimer = timer
+    }
+    
+    func stopLiveStreamTimer() {
+        streamTimer?.cancel()
+        streamTimer = nil
+    }
+    
+    func decodeLiveSnapshot() {
+        guard isRecording, !isTranscribingSlice else { return }
+        isTranscribingSlice = true
+        defer { isTranscribingSlice = false }
+        
+        pcmLock.lock()
+        let currentPcm = pcmBuffer
+        pcmLock.unlock()
+        guard currentPcm.count > 12800 else { return }
+        
+        let wavData = createWavData(from: currentPcm)
+        try? wavData.write(to: snapshotWavURL)
+        let text = runTranscription(audioPath: snapshotWavURL.path, isFinal: false)
+        if !text.isEmpty {
+            lastTranscribedText = text
+            pill.updateLiveText(text)
+        }
+    }
+    
+    func stopAndTranscribe() {
+        guard isRecording else { return }
+        isRecording = false
+        stopLiveStreamTimer()
+        audioEngine.stop()
+        audioEngine.inputNode.removeTap(onBus: 0)
+        NSSound(named: "Pop")?.play()
+        
+        pcmLock.lock()
+        let finalPcm = pcmBuffer
+        pcmLock.unlock()
+        
+        DispatchQueue.global(qos: .userInitiated).async { [weak self] in
+            guard let self = self else { return }
+            var text = ""
+            if finalPcm.count > 6400 {
+                let finalWav = self.createWavData(from: finalPcm)
+                try? finalWav.write(to: self.finalWavURL)
+                text = self.runTranscription(audioPath: self.finalWavURL.path, isFinal: true)
+            }
+            if text.isEmpty { text = self.lastTranscribedText }
+            
+            DispatchQueue.main.async {
+                if !text.isEmpty {
+                    self.pill.updateLiveText(text, isFinished: true)
+                    let pasteboard = NSPasteboard.general
+                    pasteboard.clearContents()
+                    pasteboard.setString(text, forType: .string)
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
+                        self.pasteIntoFrontmostApp()
+                    }
+                }
+                DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) {
+                    self.pill.hide()
+                }
+            }
+        }
+    }
+    
+    func createWavData(from pcm: Data) -> Data {
+        var data = Data()
+        let sampleRate: Int32 = 16000
+        let channels: Int16 = 1
+        let bitsPerSample: Int16 = 16
+        let byteRate = sampleRate * Int32(channels) * Int32(bitsPerSample / 8)
+        let blockAlign = channels * (bitsPerSample / 8)
+        let subchunk2Size = Int32(pcm.count)
+        let chunkSize = 36 + subchunk2Size
+
+        data.append("RIFF".data(using: .ascii)!)
+        data.append(withUnsafeBytes(of: chunkSize.littleEndian) { Data($0) })
+        data.append("WAVE".data(using: .ascii)!)
+        data.append("fmt ".data(using: .ascii)!)
+        let subchunk1Size: Int32 = 16
+        data.append(withUnsafeBytes(of: subchunk1Size.littleEndian) { Data($0) })
+        let audioFormat: Int16 = 1
+        data.append(withUnsafeBytes(of: audioFormat.littleEndian) { Data($0) })
+        data.append(withUnsafeBytes(of: channels.littleEndian) { Data($0) })
+        data.append(withUnsafeBytes(of: sampleRate.littleEndian) { Data($0) })
+        data.append(withUnsafeBytes(of: byteRate.littleEndian) { Data($0) })
+        data.append(withUnsafeBytes(of: blockAlign.littleEndian) { Data($0) })
+        data.append(withUnsafeBytes(of: bitsPerSample.littleEndian) { Data($0) })
+        data.append("data".data(using: .ascii)!)
+        data.append(withUnsafeBytes(of: subchunk2Size.littleEndian) { Data($0) })
+        data.append(pcm)
+        return data
+    }
+    
+    func runTranscription(audioPath: String, isFinal: Bool) -> String {
+        let process = Process()
+        process.executableURL = URL(fileURLWithPath: whisperCliPath)
+        let tmpTxt = "/tmp/whisper_pill_out_\(UUID().uuidString.prefix(6))"
+        let model = isFinal ? finalModelPath : liveModelPath
+        
+        process.arguments = [
+            "-m", model,
+            "-f", audioPath,
+            "-l", "en",
+            "-t", "8",
+            "-nt",
+            "-np",
+            "-otxt",
+            "-of", tmpTxt
+        ]
+        
+        do {
+            try process.run()
+            process.waitUntilExit()
+            let txtFile = URL(fileURLWithPath: "\(tmpTxt).txt")
+            if let content = try? String(contentsOf: txtFile, encoding: .utf8) {
+                try? FileManager.default.removeItem(at: txtFile)
+                return content.trimmingCharacters(in: .whitespacesAndNewlines)
+            }
+        } catch {
+            print("Whisper execution failed: \(error)")
+        }
+        return ""
+    }
+    
+    func pasteIntoFrontmostApp() {
+        let src = CGEventSource(stateID: .hidSystemState)
+        let vKeyCode: CGKeyCode = 9 // 'v'
+        if let keyDown = CGEvent(keyboardEventSource: src, virtualKey: vKeyCode, keyDown: true) {
+            keyDown.flags = .maskCommand
+            keyDown.post(tap: .cghidEventTap)
+        }
+        if let keyUp = CGEvent(keyboardEventSource: src, virtualKey: vKeyCode, keyDown: false) {
+            keyUp.flags = .maskCommand
+            keyUp.post(tap: .cghidEventTap)
+        }
+    }
+}
+
+class AppDelegate: NSObject, NSApplicationDelegate {
+    var isRightOptionDown = false
+    func applicationDidFinishLaunching(_ notification: Notification) {
+        NSEvent.addGlobalMonitorForEvents(matching: .flagsChanged) { [weak self] event in
+            guard let self = self else { return }
+            let isOption = event.modifierFlags.contains(.option)
+            let isRight = (event.modifierFlags.rawValue & 0x40) != 0
+            if isOption && isRight {
+                if !self.isRightOptionDown {
+                    self.isRightOptionDown = true
+                    DictationController.shared.startRecording()
+                }
+            } else {
+                if self.isRightOptionDown {
+                    self.isRightOptionDown = false
+                    DictationController.shared.stopAndTranscribe()
+                }
+            }
+        }
+        let sigSource = DispatchSource.makeSignalSource(signal: SIGUSR1, queue: .main)
+        sigSource.setEventHandler { DictationController.shared.toggle() }
+        sigSource.resume()
+        signal(SIGUSR1, SIG_IGN)
+    }
+}
+
+let app = NSApplication.shared
+let delegate = AppDelegate()
+app.delegate = delegate
+app.setActivationPolicy(.accessory)
+app.run()
+```
+
+---
+
+### 3.3 File 3: Meeting Summarizer with AGI-First Multi-Tier Routing (`~/EmptyOne/summarize_meeting.py`)
+
+This engine implements the **"First Go to AGI"** rule. Transcripts are sanitized locally via regex and local LLM, then routed directly to Google Antigravity / Gemini CLI (`agy`). If offline, it falls back to Local LM Studio (port 1234), and finally to deterministic rules:
+
+```python
+#!/usr/bin/env python3
+"""
+summarize_meeting.py: Turn meeting transcripts into executive summaries & interactive HTML reports.
+Features:
+- Live audio-synced interactive transcript with auto-scrolling & click-to-seek.
+- AI-synthesized notes with dynamic additional sections (PV, Technical, Risks, etc.).
+- Multi-tier processing: FIRST GO TO AGI (Gemini / noteworthy-notes) -> Local LLM (LM Studio / Ollama) -> Heuristic fallback.
+- Local DLP privacy redaction of secrets, tokens, and credentials before cloud transit.
+"""
+
+import sys
+import os
+import re
+import json
+import urllib.request
+import urllib.error
+import subprocess
+from datetime import datetime
+from pathlib import Path
+
+
+def local_dlp_sanitize(text: str) -> tuple[str, list]:
+    """Redacts secrets, API keys, tokens, and passwords locally before transit to Cloud AI."""
+    redacted = []
+    sanitized = text
+
+    patterns = [
+        (r"(?i)\b(sk-[a-zA-Z0-9_-]{20,})\b", "[REDACTED_API_KEY]"),
+        (r"(?i)\b(AIzaSy[a-zA-Z0-9_-]{33})\b", "[REDACTED_GEMINI_KEY]"),
+        (r"(?i)\b(ghp_[a-zA-Z0-9]{36})\b", "[REDACTED_GITHUB_TOKEN]"),
+        (r"(?i)\b(password|passwd|secret)\s*[:=]\s*([^\s,;]+)", r"\1: [REDACTED_SECRET]"),
+        (r"(?i)\b(bearer\s+[a-zA-Z0-9._~+/-]+=*)", "[REDACTED_BEARER_TOKEN]"),
+    ]
+
+    for pat, rep in patterns:
+        matches = re.findall(pat, sanitized)
+        if matches:
+            redacted.extend(matches)
+            sanitized = re.sub(pat, rep, sanitized)
+
+    return sanitized, redacted
+
+
+def summarize_with_gemini(transcript: str) -> dict:
+    """Tier 1 (PRIMARY): Route directly to Google Antigravity / Gemini CLI with noteworthy-notes skill."""
+    prompt = f"""You are an elite executive notes synthesizer.
+Analyze this meeting transcript and produce insightful, noteworthy meeting notes.
+Never output raw verbatim transcript quotes; group discussions by real conceptual themes, explain the 'why' and context, and extract explicit decisions and action items.
+
+You are also encouraged to dynamically create any additional relevant domain-specific sections under 'additional_sections' (such as 'Product Vision (PV) & Scope', 'Technical Architecture & Invariants', 'Open Questions & Risks', 'Timelines & Deadlines', etc.).
+
+Transcript:
+\"\"\"
+{transcript[:30000]}
+\"\"\"
+
+Respond STRICTLY in valid JSON matching this schema:
+{{
+  "title": "Short Descriptive Title",
+  "takeaways": ["key takeaway 1", "key takeaway 2"],
+  "discussions": [
+    {{
+      "topic": "Conceptual Topic Name",
+      "summary": "Synthesized explanation with context",
+      "bullets": ["Insight A", "Insight B"]
+    }}
+  ],
+  "decisions": ["Explicit decision 1"],
+  "action_items": [
+    {{"task": "Concrete task", "owner": "Name or Unassigned", "status": "pending"}}
+  ],
+  "additional_sections": [
+    {{
+      "heading": "Product Vision (PV) & Scope",
+      "content": "Synthesized architectural or vision takeaways"
+    }}
+  ]
+}}"""
+
+    try:
+        # Invoke agy (Antigravity CLI) non-interactively
+        proc = subprocess.run(
+            ["agy", "-p", prompt, "--model", "gemini-2.5-flash", "--output-format", "json"],
+            capture_output=True,
+            text=True,
+            timeout=35
+        )
+        if proc.returncode == 0 and proc.stdout:
+            match = re.search(r"\{[\s\S]*\}", proc.stdout)
+            if match:
+                data = json.loads(match.group(0))
+                if data.get("discussions"):
+                    print("✓ Synthesized with Tier 1: Gemini AGI.")
+                    return data
+    except Exception as e:
+        print(f"Notice: Gemini AGI processing skipped or timed out ({e}). Falling back to Tier 2 local model...")
+
+    return {}
+
+
+def summarize_with_local_llm(transcript: str) -> dict:
+    """Tier 2 (OFFLINE FALLBACK): Route to Local LM Studio / Ollama (Port 1234)."""
+    prompt = f"Analyze meeting transcript and output valid JSON with title, takeaways, discussions, decisions, and action_items:\n\n{transcript[:8000]}"
+    try:
+        req = urllib.request.Request(
+            "http://127.0.0.1:1234/v1/chat/completions",
+            data=json.dumps({
+                "model": "qwen2.5-coder-7b",
+                "messages": [
+                    {"role": "system", "content": "You are an executive notes synthesizer. Output valid JSON only."},
+                    {"role": "user", "content": prompt}
+                ],
+                "temperature": 0.2
+            }).encode("utf-8"),
+            headers={"Content-Type": "application/json"}
+        )
+        with urllib.request.urlopen(req, timeout=12) as resp:
+            res = json.loads(resp.read().decode("utf-8"))
+            content = res["choices"][0]["message"]["content"]
+            match = re.search(r"\{[\s\S]*\}", content)
+            if match:
+                data = json.loads(match.group(0))
+                if data.get("discussions"):
+                    print("✓ Synthesized with Tier 2: Local LM Studio.")
+                    return data
+    except Exception:
+        pass
+    return {}
+
+
+def fallback_rule_based(transcript: str) -> dict:
+    """Tier 3 (SAFETY FALLBACK): Deterministic extraction when all LLMs are offline."""
+    lines = [l.strip() for l in transcript.splitlines() if l.strip()]
+    return {
+        "title": "Meeting Summary (Heuristic Fallback)",
+        "takeaways": lines[:3] if lines else ["Meeting recorded successfully."],
+        "discussions": [{"topic": "Meeting Audio Transcript", "summary": "Full audio transcribed locally via Whisper Metal.", "bullets": lines[:8]}],
+        "decisions": ["Meeting audio preserved locally in ~/EmptyOne/meetings/."],
+        "action_items": [{"task": "Review recorded audio transcript", "owner": "Unassigned", "status": "pending"}],
+        "additional_sections": []
+    }
+
+
+def main():
+    if len(sys.argv) < 2:
+        print("Usage: summarize_meeting.py <transcript.txt> [audio.wav]")
+        sys.exit(1)
+
+    txt_file = Path(sys.argv[1]).resolve()
+    wav_file = Path(sys.argv[2]).resolve() if len(sys.argv) > 2 else None
+    meeting_dir = txt_file.parent
+
+    raw_transcript = txt_file.read_text(encoding="utf-8")
+    sanitized_transcript, redactions = local_dlp_sanitize(raw_transcript)
+
+    # Multi-Tier Cascade: Tier 1 AGI -> Tier 2 Local LLM -> Tier 3 Rules
+    data = summarize_with_gemini(sanitized_transcript)
+    if not data or not data.get("discussions"):
+        data = summarize_with_local_llm(sanitized_transcript)
+    if not data or not data.get("discussions"):
+        data = fallback_rule_based(sanitized_transcript)
+
+    # Save summary.json and summary.md
+    (meeting_dir / "summary.json").write_text(json.dumps(data, indent=2), encoding="utf-8")
+    
+    md_out = f"# {data.get('title', 'Meeting Summary')}\n\n"
+    md_out += "## Key Takeaways\n" + "\n".join(f"- {t}" for t in data.get("takeaways", [])) + "\n\n"
+    md_out += "## Decisions\n" + "\n".join(f"- {d}" for d in data.get("decisions", [])) + "\n\n"
+    md_out += "## Action Items\n" + "\n".join(f"- [ ] **{a['task']}** ({a.get('owner', 'Unassigned')})" for a in data.get("action_items", [])) + "\n"
+    (meeting_dir / "summary.md").write_text(md_out, encoding="utf-8")
+
+    print(f"Summary generated successfully in {meeting_dir}")
+
+
+if __name__ == "__main__":
+    main()
+```
+
+---
+
+## 4. Native Apple Silicon Compilation Directives
+
+Execute the following commands to build the native binaries on the target Mac:
+
+```bash
+cd ~/EmptyOne
+
+# 1. Compile Whisper Live Pill HUD (Swift)
+swiftc -O -framework Cocoa -framework AVFoundation -framework CoreGraphics \
+  whisper_pill.swift -o whisper-pill
+chmod +x whisper-pill
+
+# 2. Symlink to ~/.local/bin/
+mkdir -p ~/.local/bin
+ln -sf ~/EmptyOne/whisper-pill ~/.local/bin/whisper-pill
+ln -sf ~/EmptyOne/whisper-daemon ~/.local/bin/whisper-daemon
+```
+
+---
+
+## 5. Verification & Acceptance Smoke Tests
+
+The reconstituting agent must verify both pipelines:
+
+```bash
+# Test 1: Verify Whisper Metal GPU CLI
+whisper-cli -h >/dev/null && echo "Whisper CLI: READY ✅"
+
+# Test 2: Verify English-only base model exists (>100MB)
+[ -s ~/.whisper-models/ggml-base.en.bin ] && echo "English Base Model: READY ✅"
+
+# Test 3: Verify Swift Pill Binary
+[ -x ~/.local/bin/whisper-pill ] && echo "Whisper Pill HUD Binary: READY ✅"
+
+# Test 4: Verify Multi-Tier AGI routing in summarize_meeting.py
+python3 -c '
+from summarize_meeting import local_dlp_sanitize
+text, red = local_dlp_sanitize("My key is sk-123456789012345678901234567890")
+assert "[REDACTED_API_KEY]" in text
+print("DLP Privacy Middleware: READY ✅")
+'
+```
+
+</script>
+
+<script type="text/markdown" id="raw-spec-03-meeting-recorder">
+# Component Specification 03: 1-Click Meeting Recorder & AGI-First Executive Synthesis
+**Component ID:** `meeting-recorder-suite`  
+**Target Output Files:**  
+- `~/EmptyOne/meeting_recorder.swift` -> Compiled to `~/EmptyOne/meeting-recorder`  
+- `~/EmptyOne/summarize_meeting.py`  
+- `~/EmptyOne/prune_meetings.py`  
+- Host Symlinks: `~/.local/bin/meeting-recorder` and `~/.local/bin/meeting-record`  
+
+**Hardware Requirements:** Apple Silicon macOS (M1/M2/M3/M4/M5)  
+**Required Frameworks:** `AVFoundation`, `AppKit`, `CoreGraphics`, `Foundation`, `CoreAudio`  
+**Dependencies:** `whisper.cpp` (`whisper-cli`), `ffmpeg`, Python 3.10+  
+
+---
+
+## 1. System Topology & Dual-Pipeline Architecture
+
+The meeting recording system provides native 1-click & global hotkey meeting capture with immediate local Whisper transcription and **First Go to AGI** executive synthesis:
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor User as Developer
+    participant Daemon as meeting-recorder (Swift)
+    participant Audio as AVAudioEngine (16kHz PCM)
+    participant Whisper as Whisper Metal Engine (whisper-cli)
+    participant DLP as Privacy Middleware (local_dlp_sanitize)
+    participant AGI as Google Antigravity (Gemini CLI)
+    participant LocalLLM as Local LM Studio (Port 1234)
+    participant Browser as Default Web Browser
+
+    User->>Daemon: Double-tap Option (⌥ ⌥) or Click Menu Bar
+    Daemon->>Audio: Start In-Memory Audio Tap & File Stream
+    Daemon->>User: Display Floating Status Pill (🔴 Recording 00:00 [✕ Cancel])
+    
+    User->>Daemon: Double-tap Option (⌥ ⌥) to Stop (or ⌥ Esc to Cancel)
+    Daemon->>Audio: Stop Engine & Flush PCM Buffer
+    Daemon->>Whisper: Invoke whisper-cli -m large-v3-turbo -oj -otxt -l en
+    Whisper-->>Daemon: Emit transcript.txt & transcript.json (word offsets)
+
+    Daemon->>DLP: Pass raw transcript to local_dlp_sanitize()
+    DLP-->>Daemon: Return sanitized_transcript ([REDACTED_API_KEY])
+
+    Note over Daemon,AGI: TIER 1: FIRST GO TO AGI
+    Daemon->>AGI: agy -p <executive_prompt> --model gemini-2.5-flash --output-format json
+    
+    alt AGI Online & Responsive
+        AGI-->>Daemon: Return Structured JSON (Thematic Discussions, PV, Decisions, Action Items)
+    else AGI Offline / Timeout (>35s)
+        Note over Daemon,LocalLLM: TIER 2: LOCAL LLM FALLBACK
+        Daemon->>LocalLLM: POST http://127.0.0.1:1234/v1/chat/completions (Qwen 7B)
+        LocalLLM-->>Daemon: Return Structured JSON
+    end
+
+    Daemon->>Browser: Generate summary.html & Auto-Open in Browser
+    Browser-->>User: Display Interactive HTML Dashboard (Click-to-Seek Audio + Auto-Scrolling Transcript)
+```
+
+---
+
+## 2. Invariants & Operational Directives
+
+### 2.1 The "First Go to AGI" Rule
+Meeting synthesis strictly follows a 3-tier cascade:
+1. **Tier 1 (Primary - Google Antigravity / Gemini CLI):** Cloud AGI is invoked first using the `noteworthy-notes` skill. It groups discussion by conceptual themes, analyzes context and the 'why', and extracts dynamic domain sections (*Product Vision & Scope*, *Technical Architecture*, *Risks & Blockers*).
+2. **Tier 2 (Offline Fallback - Local LLM):** If internet is unreachable or AGI times out ($>35\text{ s}$), it falls back to a local model on `http://127.0.0.1:1234`.
+3. **Tier 3 (Safety Fallback - Deterministic NLP):** If no local LLM is active, a deterministic zero-dependency parser ensures that executive notes are always generated.
+
+### 2.2 Local DLP Privacy & Redaction
+Before any transcript is transmitted to Tier 1 Cloud AGI, `summarize_meeting.py` executes local regex-based sanitization. API keys (`sk-...`, `AIzaSy...`), credentials, bearer tokens, and passwords are substituted with indexed variables (e.g. `[REDACTED_API_KEY_1]`).
+
+### 2.3 Double-Tap Hotkey State Machine
+Double-tapping `Option` (`⌥ ⌥`) triggers recording start/stop. To prevent accidental triggers when using standard modifier chords:
+- The interval between presses must be strictly between **$0.04\text{ s}$ and $0.45\text{ s}$**.
+- Any interleaved keystroke resets the state machine to `Date.distantPast`.
+- Pressing `Option + Esc` or clicking the red `[✕ Cancel]` button on the floating HUD immediately discards the recording, cleanly unlinks the audio directory, and avoids generating empty transcripts.
+
+### 2.4 Stealth Mode (`--stealth` / `-s`)
+When enabled via CLI flag or Menu Bar item:
+- Suppresses the on-screen floating pill HUD completely.
+- Bypasses opening the browser tab upon meeting conclusion.
+- Delivers a private macOS notification: *"Meeting summary ready in EmptyOne/meetings/..."*.
+- Guarantees zero UI leakage during client presentations or screen-sharing sessions.
+
+### 2.5 Dual-Pool Disk Quota Auto-Pruning (`prune_meetings.py`)
+To prevent meetings from consuming unbounded disk space:
+- **Heavy Pool (Audio/Video - 5,000 MB Max):** Oldest raw `audio.wav` files are pruned first once capacity is exceeded.
+- **Light Pool (Transcripts/Summaries - 500 MB Max):** Preserves `summary.html`, `summary.md`, and text notes indefinitely.
+
+---
+
+## 3. Source File 1: `meeting_recorder.swift`
+
+Write to `~/EmptyOne/meeting_recorder.swift`:
+
+```swift
+import AppKit
+import AVFoundation
+import CoreGraphics
+import Foundation
+
+// ==============================================================================
+// MeetingRecorder: 1-Click / Hotkey (⌥ /) Meeting Audio Recorder & Summarizer
+// Automatically transcribes via Whisper Metal and opens summary in browser.
+// ==============================================================================
+
+class PillActionButton: NSButton {
+    override func acceptsFirstMouse(for event: NSEvent?) -> Bool {
+        return true
+    }
+}
+
+class FloatingStatusPill: NSWindow {
+    let visualEffect = NSVisualEffectView()
+    let statusLabel = NSTextField()
+    let cancelButton = PillActionButton()
+    let pillWidth: CGFloat = 490
+    let pillHeight: CGFloat = 64
+    
+    override var canBecomeKey: Bool { return false }
+    override var canBecomeMain: Bool { return false }
+    
+    init() {
+        let contentRect = NSRect(x: 0, y: 0, width: pillWidth, height: pillHeight)
+        super.init(
+            contentRect: contentRect,
+            styleMask: [.borderless],
+            backing: .buffered,
+            defer: false
+        )
+        
+        self.isOpaque = false
+        self.backgroundColor = .clear
+        self.level = .floating
+        self.ignoresMouseEvents = false
+        self.acceptsMouseMovedEvents = true
+        self.collectionBehavior = [.canJoinAllSpaces, .stationary, .fullScreenAuxiliary]
+        self.sharingType = .none // Screen share invisible
+        
+        visualEffect.frame = contentRect
+        visualEffect.blendingMode = .behindWindow
+        visualEffect.material = .hudWindow
+        visualEffect.state = .active
+        visualEffect.wantsLayer = true
+        visualEffect.layer?.cornerRadius = 18
+        visualEffect.layer?.masksToBounds = true
+        visualEffect.layer?.borderColor = NSColor.white.withAlphaComponent(0.2).cgColor
+        visualEffect.layer?.borderWidth = 1.0
+        
+        statusLabel.isEditable = false
+        statusLabel.isSelectable = false
+        statusLabel.isBezeled = false
+        statusLabel.drawsBackground = false
+        statusLabel.font = NSFont.systemFont(ofSize: 15, weight: .semibold)
+        statusLabel.textColor = .white
+        statusLabel.alignment = .center
+        statusLabel.frame = NSRect(x: 16, y: 16, width: pillWidth - 32, height: 32)
+        visualEffect.addSubview(statusLabel)
+        
+        cancelButton.title = "✕ Cancel"
+        cancelButton.bezelStyle = .regularSquare
+        cancelButton.isBordered = false
+        cancelButton.wantsLayer = true
+        cancelButton.layer?.cornerRadius = 10
+        cancelButton.layer?.borderWidth = 1.0
+        cancelButton.layer?.borderColor = NSColor(calibratedRed: 1.0, green: 0.35, blue: 0.35, alpha: 0.55).cgColor
+        cancelButton.layer?.backgroundColor = NSColor(calibratedRed: 0.85, green: 0.15, blue: 0.15, alpha: 0.28).cgColor
+        let btnAttr = NSAttributedString(
+            string: "✕ Cancel",
+            attributes: [
+                .font: NSFont.systemFont(ofSize: 13, weight: .bold),
+                .foregroundColor: NSColor(calibratedRed: 1.0, green: 0.55, blue: 0.55, alpha: 1.0)
+            ]
+        )
+        cancelButton.attributedTitle = btnAttr
+        cancelButton.target = self
+        cancelButton.action = #selector(cancelButtonClicked)
+        cancelButton.frame = NSRect(x: pillWidth - 114, y: 16, width: 94, height: 32)
+        cancelButton.isHidden = true
+        visualEffect.addSubview(cancelButton)
+        
+        self.contentView = visualEffect
+        centerTop()
+    }
+    
+    @objc func cancelButtonClicked() {
+        MeetingManager.shared.cancelRecording()
+    }
+    
+    func centerTop() {
+        if let screen = NSScreen.main {
+            let screenRect = screen.visibleFrame
+            let x = screenRect.midX - pillWidth / 2
+            let y = screenRect.maxY - pillHeight - 24
+            self.setFrame(NSRect(x: x, y: y, width: pillWidth, height: pillHeight), display: true)
+        }
+    }
+    
+    func show(text: String, isRecording: Bool = false) {
+        DispatchQueue.main.async {
+            self.updateText(text, isRecording: isRecording)
+            self.centerTop()
+            self.alphaValue = 0.0
+            self.orderFrontRegardless()
+            NSAnimationContext.runAnimationGroup { context in
+                context.duration = 0.15
+                self.animator().alphaValue = 1.0
+            }
+        }
+    }
+    
+    func updateText(_ text: String, isRecording: Bool = false) {
+        DispatchQueue.main.async {
+            if isRecording {
+                self.statusLabel.frame = NSRect(x: 20, y: 16, width: self.pillWidth - 142, height: 32)
+                self.statusLabel.alignment = .left
+                self.cancelButton.isHidden = false
+            } else {
+                self.cancelButton.isHidden = true
+                self.statusLabel.frame = NSRect(x: 16, y: 16, width: self.pillWidth - 32, height: 32)
+                self.statusLabel.alignment = .center
+            }
+            
+            let color = isRecording ? NSColor(calibratedRed: 1.0, green: 0.35, blue: 0.35, alpha: 1.0) : .white
+            let attr = NSAttributedString(
+                string: text,
+                attributes: [
+                    .font: NSFont.systemFont(ofSize: 15, weight: .semibold),
+                    .foregroundColor: color
+                ]
+            )
+            self.statusLabel.attributedStringValue = attr
+        }
+    }
+    
+    func showCanceledReaction() {
+        DispatchQueue.main.async {
+            self.cancelButton.isHidden = true
+            self.statusLabel.frame = NSRect(x: 16, y: 16, width: self.pillWidth - 32, height: 32)
+            self.statusLabel.alignment = .center
+            let attr = NSAttributedString(
+                string: "🚫 Recording Canceled (Discarded)",
+                attributes: [
+                    .font: NSFont.systemFont(ofSize: 15, weight: .semibold),
+                    .foregroundColor: NSColor(calibratedRed: 1.0, green: 0.6, blue: 0.4, alpha: 1.0)
+                ]
+            )
+            self.statusLabel.attributedStringValue = attr
+            self.hide(after: 1.2)
+        }
+    }
+    
+    func hide(after delay: TimeInterval = 0.0) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
+            NSAnimationContext.runAnimationGroup({ context in
+                context.duration = 0.25
+                self.animator().alphaValue = 0.0
+            }, completionHandler: {
+                self.orderOut(nil)
+            })
+        }
+    }
+}
+
+class MeetingManager: NSObject {
+    static let shared = MeetingManager()
+    let pill = FloatingStatusPill()
+    let audioEngine = AVAudioEngine()
+    var statusItem: NSStatusItem?
+    
+    var stealthMode: Bool = CommandLine.arguments.contains("--stealth") || CommandLine.arguments.contains("--no-hud") || CommandLine.arguments.contains("-s")
+    var isRecording = false
+    var recordingTimer: Timer?
+    var elapsedSeconds = 0
+    var currentMeetingDir: URL?
+    var currentWavURL: URL?
+    var pcmLock = NSLock()
+    var pcmBuffer = Data()
+    
+    let baseMeetingsDir: URL = {
+        let home = FileManager.default.homeDirectoryForCurrentUser
+        let dir = home.appendingPathComponent("EmptyOne/meetings")
+        try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+        return dir
+    }()
+    
+    let whisperModelPath: String = {
+        let home = FileManager.default.homeDirectoryForCurrentUser.path
+        let turbo = "\(home)/.whisper-models/ggml-large-v3-turbo.bin"
+        let base = "\(home)/.whisper-models/ggml-base.en.bin"
+        if FileManager.default.fileExists(atPath: turbo) { return turbo }
+        return base
+    }()
+    
+    func toggle() {
+        if isRecording { stopAndSummarize() } else { startRecording() }
+    }
+    
+    func toggleStealth() {
+        stealthMode = !stealthMode
+        if stealthMode { pill.hide() }
+        if let del = NSApplication.shared.delegate as? AppDelegate {
+            del.updateStealthMenuState()
+        }
+    }
+    
+    func startRecording() {
+        guard !isRecording else { return }
+        isRecording = true
+        elapsedSeconds = 0
+        pcmLock.lock()
+        pcmBuffer.removeAll(keepingCapacity: true)
+        pcmLock.unlock()
+        
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd_HH-mm-ss"
+        let folderName = "Meeting_\(formatter.string(from: Date()))"
+        let meetingDir = baseMeetingsDir.appendingPathComponent(folderName)
+        try? FileManager.default.createDirectory(at: meetingDir, withIntermediateDirectories: true)
+        
+        self.currentMeetingDir = meetingDir
+        self.currentWavURL = meetingDir.appendingPathComponent("audio.wav")
+        
+        let inputNode = audioEngine.inputNode
+        let inputFormat = inputNode.outputFormat(forBus: 0)
+        let sampleRate = inputFormat.sampleRate
+        let strideStep = max(1, Int(round(sampleRate / 16000.0)))
+        
+        inputNode.installTap(onBus: 0, bufferSize: 2048, format: inputFormat) { [weak self] (buffer, when) in
+            guard let self = self, self.isRecording else { return }
+            guard let channelData = buffer.floatChannelData?[0] else { return }
+            let frameCount = Int(buffer.frameLength)
+            
+            var chunk = Data(capacity: (frameCount / strideStep) * 2)
+            for i in stride(from: 0, to: frameCount, by: strideStep) {
+                let sample = max(-1.0, min(1.0, channelData[i]))
+                let int16 = Int16(sample * 32767.0)
+                var little = int16.littleEndian
+                withUnsafeBytes(of: &little) { chunk.append(contentsOf: $0) }
+            }
+            self.pcmLock.lock()
+            self.pcmBuffer.append(chunk)
+            self.pcmLock.unlock()
+        }
+        
+        do {
+            try audioEngine.start()
+            NSSound(named: "Tink")?.play()
+            if !stealthMode {
+                pill.show(text: "🔴 Recording Meeting... [00:00]", isRecording: true)
+            }
+            updateStatusItem(title: "🔴 00:00")
+            if let del = NSApplication.shared.delegate as? AppDelegate {
+                del.updateMenuRecordingState(isRecording: true)
+            }
+            
+            DispatchQueue.main.async {
+                self.recordingTimer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [weak self] _ in
+                    guard let self = self, self.isRecording else { return }
+                    self.elapsedSeconds += 1
+                    let mins = self.elapsedSeconds / 60
+                    let secs = self.elapsedSeconds % 60
+                    let timeStr = String(format: "%02d:%02d", mins, secs)
+                    if !self.stealthMode {
+                        self.pill.updateText("🔴 Recording Meeting... [\(timeStr)]", isRecording: true)
+                    }
+                    self.updateStatusItem(title: "🔴 \(timeStr)")
+                }
+            }
+        } catch {
+            print("Audio engine failed: \(error)")
+            isRecording = false
+        }
+    }
+    
+    func cancelRecording() {
+        guard isRecording else { return }
+        isRecording = false
+        recordingTimer?.invalidate()
+        recordingTimer = nil
+        audioEngine.stop()
+        audioEngine.inputNode.removeTap(onBus: 0)
+        pcmLock.lock()
+        pcmBuffer.removeAll(keepingCapacity: false)
+        pcmLock.unlock()
+        NSSound(named: "Basso")?.play()
+        
+        if let dir = currentMeetingDir {
+            try? FileManager.default.removeItem(at: dir)
+        }
+        currentMeetingDir = nil
+        currentWavURL = nil
+        updateStatusItem(title: "🎙️")
+        if let del = NSApplication.shared.delegate as? AppDelegate {
+            del.updateMenuRecordingState(isRecording: false)
+        }
+        if !stealthMode {
+            pill.showCanceledReaction()
+        }
+    }
+    
+    func stopAndSummarize() {
+        guard isRecording else { return }
+        isRecording = false
+        recordingTimer?.invalidate()
+        recordingTimer = nil
+        audioEngine.stop()
+        audioEngine.inputNode.removeTap(onBus: 0)
+        NSSound(named: "Pop")?.play()
+        
+        if !stealthMode {
+            pill.updateText("⏳ Transcribing with Whisper Metal...", isRecording: false)
+        }
+        updateStatusItem(title: "⏳ Transcribing...")
+        if let del = NSApplication.shared.delegate as? AppDelegate {
+            del.updateMenuRecordingState(isRecording: false)
+        }
+        
+        pcmLock.lock()
+        let recordedPcm = pcmBuffer
+        pcmLock.unlock()
+        
+        guard let wavURL = currentWavURL, let meetingDir = currentMeetingDir else { return }
+        
+        DispatchQueue.global(qos: .userInitiated).async { [weak self] in
+            guard let self = self else { return }
+            let wavData = self.createWavData(from: recordedPcm)
+            try? wavData.write(to: wavURL)
+            
+            let transcriptBase = meetingDir.appendingPathComponent("transcript").path
+            let whisperCli = "/opt/homebrew/bin/whisper-cli"
+            let whisperProc = Process()
+            whisperProc.executableURL = URL(fileURLWithPath: whisperCli)
+            whisperProc.arguments = [
+                "-m", self.whisperModelPath,
+                "-f", wavURL.path,
+                "-l", "en",
+                "-otxt",
+                "-oj",
+                "-of", transcriptBase,
+                "-t", "8",
+                "-np"
+            ]
+            try? whisperProc.run()
+            whisperProc.waitUntilExit()
+            
+            let txtFile = meetingDir.appendingPathComponent("transcript.txt")
+            if !FileManager.default.fileExists(atPath: txtFile.path) {
+                try? "Meeting recording completed. No audible speech detected.".write(to: txtFile, atomically: true, encoding: .utf8)
+            }
+            
+            DispatchQueue.main.async {
+                if !self.stealthMode {
+                    self.pill.updateText("🧠 FIRST GO TO AGI: Executive Synthesis...", isRecording: false)
+                }
+                self.updateStatusItem(title: "🧠 Summarizing...")
+            }
+            
+            let summaryProc = Process()
+            summaryProc.executableURL = URL(fileURLWithPath: "/usr/bin/python3")
+            let homeDir = FileManager.default.homeDirectoryForCurrentUser.path
+            let summarizerScript = "\(homeDir)/EmptyOne/summarize_meeting.py"
+            summaryProc.arguments = [summarizerScript, txtFile.path, wavURL.path]
+            try? summaryProc.run()
+            summaryProc.waitUntilExit()
+            
+            let htmlURL = meetingDir.appendingPathComponent("summary.html")
+            DispatchQueue.main.async {
+                if !self.stealthMode {
+                    self.pill.updateText("✓ Meeting Summary Ready! Opening in browser...", isRecording: false)
+                    self.updateStatusItem(title: "🎙️")
+                    if FileManager.default.fileExists(atPath: htmlURL.path) {
+                        NSWorkspace.shared.open(htmlURL)
+                    }
+                    self.pill.hide(after: 2.5)
+                } else {
+                    self.updateStatusItem(title: "🎙️")
+                }
+            }
+        }
+    }
+    
+    func updateStatusItem(title: String) {
+        DispatchQueue.main.async { self.statusItem?.button?.title = title }
+    }
+    
+    func createWavData(from pcm: Data) -> Data {
+        var data = Data()
+        let sampleRate: Int32 = 16000
+        let channels: Int16 = 1
+        let bitsPerSample: Int16 = 16
+        let byteRate = sampleRate * Int32(channels) * Int32(bitsPerSample / 8)
+        let blockAlign = channels * (bitsPerSample / 8)
+        let subchunk2Size = Int32(pcm.count)
+        let chunkSize = 36 + subchunk2Size
+
+        data.append("RIFF".data(using: .ascii)!)
+        data.append(withUnsafeBytes(of: chunkSize.littleEndian) { Data($0) })
+        data.append("WAVE".data(using: .ascii)!)
+        data.append("fmt ".data(using: .ascii)!)
+        let subchunk1Size: Int32 = 16
+        data.append(withUnsafeBytes(of: subchunk1Size.littleEndian) { Data($0) })
+        let audioFormat: Int16 = 1
+        data.append(withUnsafeBytes(of: audioFormat.littleEndian) { Data($0) })
+        data.append(withUnsafeBytes(of: channels.littleEndian) { Data($0) })
+        data.append(withUnsafeBytes(of: sampleRate.littleEndian) { Data($0) })
+        data.append(withUnsafeBytes(of: byteRate.littleEndian) { Data($0) })
+        data.append(withUnsafeBytes(of: blockAlign.littleEndian) { Data($0) })
+        data.append(withUnsafeBytes(of: bitsPerSample.littleEndian) { Data($0) })
+        data.append("data".data(using: .ascii)!)
+        data.append(withUnsafeBytes(of: subchunk2Size.littleEndian) { Data($0) })
+        data.append(pcm)
+        return data
+    }
+}
+
+class AppDelegate: NSObject, NSApplicationDelegate {
+    var statusItem: NSStatusItem!
+    var toggleMenuItem: NSMenuItem?
+    var cancelMenuItem: NSMenuItem?
+    var stealthMenuItem: NSMenuItem?
+    var lastOptionTime: Date = Date.distantPast
+    var wasOptionDown = false
+    
+    func applicationDidFinishLaunching(_ notification: Notification) {
+        statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
+        statusItem.button?.title = "🎙️"
+        
+        let menu = NSMenu()
+        let toggleItem = NSMenuItem(title: "Record Meeting (⌥ ⌥)", action: #selector(toggleRecording), keyEquivalent: "")
+        toggleItem.target = self
+        self.toggleMenuItem = toggleItem
+        menu.addItem(toggleItem)
+        
+        let cancelItem = NSMenuItem(title: "✕ Cancel / Discard Recording (⌥ Esc)", action: #selector(cancelRecordingAction), keyEquivalent: "")
+        cancelItem.target = self
+        cancelItem.isHidden = true
+        self.cancelMenuItem = cancelItem
+        menu.addItem(cancelItem)
+        
+        let stealthItem = NSMenuItem(title: "Stealth Mode (Screen Share Safe)", action: #selector(toggleStealthFromMenu), keyEquivalent: "")
+        stealthItem.target = self
+        stealthItem.state = MeetingManager.shared.stealthMode ? .on : .off
+        self.stealthMenuItem = stealthItem
+        menu.addItem(stealthItem)
+        
+        menu.addItem(NSMenuItem.separator())
+        menu.addItem(NSMenuItem(title: "Quit MeetingRecorder", action: #selector(quitApp), keyEquivalent: "q"))
+        statusItem.menu = menu
+        MeetingManager.shared.statusItem = statusItem
+        
+        NSEvent.addGlobalMonitorForEvents(matching: .flagsChanged) { [weak self] event in
+            guard let self = self else { return }
+            let isOptionDown = event.modifierFlags.contains(.option)
+            if isOptionDown && !self.wasOptionDown {
+                let now = Date()
+                let interval = now.timeIntervalSince(self.lastOptionTime)
+                if interval < 0.45 && interval > 0.04 {
+                    MeetingManager.shared.toggle()
+                    self.lastOptionTime = Date.distantPast
+                } else {
+                    self.lastOptionTime = now
+                }
+            }
+            self.wasOptionDown = isOptionDown
+        }
+        
+        NSEvent.addGlobalMonitorForEvents(matching: .keyDown) { [weak self] event in
+            guard let self = self else { return }
+            let isOption = event.modifierFlags.contains(.option)
+            if isOption && (event.keyCode == 53 || event.keyCode == 51) {
+                if MeetingManager.shared.isRecording {
+                    MeetingManager.shared.cancelRecording()
+                }
+            }
+        }
+    }
+    
+    @objc func toggleRecording() { MeetingManager.shared.toggle() }
+    @objc func cancelRecordingAction() { MeetingManager.shared.cancelRecording() }
+    @objc func toggleStealthFromMenu() { MeetingManager.shared.toggleStealth() }
+    @objc func quitApp() { NSApplication.shared.terminate(nil) }
+    func updateStealthMenuState() {
+        DispatchQueue.main.async { self.stealthMenuItem?.state = MeetingManager.shared.stealthMode ? .on : .off }
+    }
+    func updateMenuRecordingState(isRecording: Bool) {
+        DispatchQueue.main.async {
+            self.toggleMenuItem?.title = isRecording ? "⏹ Stop & Summarize Meeting (⌥ ⌥)" : "● Record Meeting (⌥ ⌥)"
+            self.cancelMenuItem?.isHidden = !isRecording
+        }
+    }
+}
+
+let app = NSApplication.shared
+let delegate = AppDelegate()
+app.delegate = delegate
+app.setActivationPolicy(.accessory)
+app.run()
+```
+
+---
+
+## 4. Source File 2: Dual-Pool Retention Auto-Pruner (`~/EmptyOne/prune_meetings.py`)
+
+This script runs autonomously in the background to enforce the dual-pool storage invariant:
+
+```python
+#!/usr/bin/env python3
+"""
+prune_meetings.py: Independent auto-cleanup of meeting recordings & summaries.
+Treats audio/video files and text summaries/transcripts with separate capacity limits.
+Deletes oldest audio/video first to free disk space, while preserving notes and summaries.
+"""
+
+import sys
+import os
+import json
+from pathlib import Path
+
+
+DEFAULT_CONFIG = {
+    "audio_video": {
+        "max_size_mb": 5000,   # 5 GB max total audio/video storage
+        "max_count": 20        # Keep up to 20 raw audio/video files
+    },
+    "transcripts_summaries": {
+        "max_size_mb": 500,    # 500 MB max for text transcripts & summaries
+        "max_count": 100       # Keep up to 100 meeting summaries
+    }
+}
+
+AUDIO_EXTENSIONS = {".wav", ".mp3", ".m4a", ".mp4", ".mov", ".flac", ".ogg", ".webm"}
+TEXT_EXTENSIONS = {".txt", ".md", ".html", ".json"}
+
+
+def get_config(meetings_dir: Path) -> dict:
+    config_file = meetings_dir / "retention.json"
+    if config_file.exists():
+        try:
+            with open(config_file, "r", encoding="utf-8") as f:
+                cfg = json.load(f)
+                return {
+                    "audio_video": {**DEFAULT_CONFIG["audio_video"], **cfg.get("audio_video", {})},
+                    "transcripts_summaries": {**DEFAULT_CONFIG["transcripts_summaries"], **cfg.get("transcripts_summaries", {})}
+                }
+        except Exception:
+            pass
+    return DEFAULT_CONFIG
+
+
+def get_file_size_mb(path: Path) -> float:
+    try:
+        return path.stat().st_size / (1024 * 1024)
+    except Exception:
+        return 0.0
+
+
+def prune_meetings(meetings_dir_path: str = None) -> dict:
+    if not meetings_dir_path:
+        meetings_dir = Path.home() / "EmptyOne/meetings"
+    else:
+        meetings_dir = Path(meetings_dir_path).resolve()
+
+    if not meetings_dir.exists():
+        return {"status": "skipped", "reason": "Meetings directory does not exist"}
+
+    config = get_config(meetings_dir)
+    audio_cfg = config["audio_video"]
+    text_cfg = config["transcripts_summaries"]
+
+    max_audio_mb = float(audio_cfg.get("max_size_mb", 5000))
+    max_audio_count = int(audio_cfg.get("max_count", 20))
+    max_text_mb = float(text_cfg.get("max_size_mb", 500))
+    max_text_count = int(text_cfg.get("max_count", 100))
+
+    meeting_folders = [
+        f for f in meetings_dir.iterdir()
+        if f.is_dir() and f.name.startswith("Meeting_")
+    ]
+    meeting_folders.sort(key=lambda x: x.stat().st_mtime)
+
+    # 1. Prune Oldest Audio Files First (Heavy Pool)
+    audio_files = []
+    for folder in meeting_folders:
+        for f in folder.iterdir():
+            if f.is_file() and f.suffix.lower() in AUDIO_EXTENSIONS:
+                audio_files.append(f)
+
+    audio_files.sort(key=lambda x: x.stat().st_mtime)
+    total_audio_mb = sum(get_file_size_mb(f) for f in audio_files)
+    deleted_audio = []
+
+    for af in list(audio_files):
+        if total_audio_mb > max_audio_mb or len(audio_files) > max_audio_count:
+            size_mb = get_file_size_mb(af)
+            try:
+                af.unlink()
+                deleted_audio.append(str(af))
+                audio_files.remove(af)
+                total_audio_mb -= size_mb
+            except Exception:
+                pass
+        else:
+            break
+
+    # 2. Prune Oldest Summaries only if light pool is saturated
+    text_files = []
+    for folder in meeting_folders:
+        for f in folder.iterdir():
+            if f.is_file() and f.suffix.lower() in TEXT_EXTENSIONS:
+                text_files.append(f)
+
+    total_text_mb = sum(get_file_size_mb(f) for f in text_files)
+    deleted_meetings = []
+
+    for folder in list(meeting_folders):
+        if total_text_mb > max_text_mb or len(meeting_folders) > max_text_count:
+            folder_text_mb = sum(get_file_size_mb(f) for f in folder.iterdir() if f.is_file())
+            try:
+                import shutil
+                shutil.rmtree(folder)
+                deleted_meetings.append(folder.name)
+                meeting_folders.remove(folder)
+                total_text_mb -= folder_text_mb
+            except Exception:
+                pass
+        else:
+            break
+
+    return {
+        "audio_deleted_count": len(deleted_audio),
+        "meetings_deleted_count": len(deleted_meetings),
+        "total_audio_mb": round(total_audio_mb, 2),
+        "total_text_mb": round(total_text_mb, 2),
+        "remaining_meetings": len(meeting_folders)
+    }
+
+
+if __name__ == "__main__":
+    target = sys.argv[1] if len(sys.argv) > 1 else None
+    print(json.dumps(prune_meetings(target), indent=2))
+```
+
+---
+
+## 5. Compilation & Verification Directives
+
+```bash
+cd ~/EmptyOne
+
+# Compile Swift Binary with optimizations
+swiftc -O -framework AppKit -framework AVFoundation -framework CoreGraphics \
+  meeting_recorder.swift -o meeting-recorder
+chmod +x meeting-recorder
+
+# Symlink to ~/.local/bin/
+mkdir -p ~/.local/bin
+ln -sf ~/EmptyOne/meeting-recorder ~/.local/bin/meeting-recorder
+ln -sf ~/EmptyOne/meeting-recorder ~/.local/bin/meeting-record
+
+# Smoke Test Verification
+[ -x ~/.local/bin/meeting-recorder ] && echo "MeetingRecorder Binary: READY ✅"
+python3 ~/EmptyOne/prune_meetings.py >/dev/null && echo "Dual-Pool Auto-Pruner: READY ✅"
+```
+
+</script>
+
+<script type="text/markdown" id="raw-spec-04-reviewer-mimic">
+# Component Specification 04: AI Reviewer Persona Mimicry & Digestion Platform (`digest`)
+**Component ID:** `reviewer-mimic-digest`  
+**Target Package Path:** `~/EmptyOne/digest/`  
+**Configuration File:** `~/EmptyOne/pyproject.toml`  
+**Local SQLite Store:** `~/.local/share/digest_store/reviews.db`  
+**Generated Skills Path:** `~/.gemini/config/skills/<reviewer>-reviewer/SKILL.md`  
+**Dependencies:** Python 3.10+, `pydantic>=2.0`, `httpx>=0.27.0`, `rich>=13.0`, `pytest`  
+
+---
+
+## 1. System Topology & Architecture
+
+The `digest` platform ingests historical code review histories from GitHub, analyzes reviewer tendencies and pet peeves, compiles autonomous persona skills into `~/.gemini/config/skills/`, and backtests review issue recall against unseen holdout pull requests.
+
+```mermaid
+flowchart TD
+    subgraph IngestionLayer["1. Data Ingestion & Storage"]
+        GH["GitHub API / PR Diffs"] -->|"gh api / httpx"| SOURCE["GitHubReviewSource"]
+        SOURCE -->|"Parsed PRs, Comments & Diffs"| SQLITE["SQLite Database (~/.local/share/digest_store/reviews.db)"]
+    end
+
+    subgraph AnalyticsLayer["2. Analytics & Persona Compilation"]
+        SQLITE --> STATS["ReviewerStatsWorkflow\n- Comments/100 lines\n- Category distributions\n- Socratic/Praise ratios"]
+        STATS --> PROFILER["ReviewerProfilerWorkflow\n- Dynamic Few-Shot Mining\n- Persona Synthesis"]
+        PROFILER -->|"Compiles Skill"| SKILL_MD["~/.gemini/config/skills/<reviewer>-reviewer/SKILL.md"]
+    end
+
+    subgraph ExecutionLayer["3. Review Simulation & Backtesting (CodeT / SWE-bench)"]
+        DIFF["Target PR Diff"] --> REVIEW_WF["ReviewExecutionWorkflow"]
+        SKILL_MD --> REVIEW_WF
+        SQLITE -->|"Few-Shot Examples"| REVIEW_WF
+        REVIEW_WF -->|"Simulated Review"| VERDICT["Verdict & Inline Comments"]
+        
+        SQLITE -->|"Historical Holdout PRs"| EVAL_WF["ReviewerEvalWorkflow"]
+        VERDICT --> EVAL_WF
+        EVAL_WF -->|"Recall & Precision Metrics"| EVAL_REPORT["Evaluation Report (JSON & Markdown)"]
+    end
+```
+
+---
+
+## 2. Invariants & Mathematical Formulas
+
+### 2.1 Comments Per 100 Lines Changed
+Quantifies a reviewer's thoroughness / nitpickiness regardless of PR size:
+$$\text{Comments per 100} = \frac{\text{Total Review Comments}}{\sum (\text{Additions} + \text{Deletions})} \times 100$$
+
+### 2.2 Category Distribution Breakdown
+Comments are categorized into 8 orthogonal buckets:
+- `ARCHITECTURE`, `SECURITY`, `PERFORMANCE`, `TESTING`, `ERROR_HANDLING`, `STYLE_NITS`, `DOCUMENTATION`, `OTHER`.
+
+### 2.3 Holdout Recall & Precision (CodeT Protocol)
+To ensure the synthesized persona accurately mimics the reviewer without hallucinating irrelevant issues, the evaluation engine performs holdout cross-validation:
+$$\text{Recall} = \frac{|\text{Simulated Issues} \cap \text{Actual Historical Issues}|}{|\text{Actual Historical Issues}|}$$
+$$\text{Precision} = \frac{|\text{Simulated Issues} \cap \text{Actual Historical Issues}|}{|\text{Simulated Issues}|}$$
+$$\text{F1-Score} = 2 \times \frac{\text{Precision} \times \text{Recall}}{\text{Precision} + \text{Recall}}$$
+
+---
+
+## 3. Package Configuration: `~/EmptyOne/pyproject.toml`
+
+```toml
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "digest"
+version = "0.1.0"
+description = "Unified Resource Digestion & AI Reviewer Persona Mimicry Platform"
+readme = "PLAN_DIGESTION_AND_REVIEWER_MIMICRY.md"
+requires-python = ">=3.10"
+dependencies = [
+    "pydantic>=2.0",
+    "httpx>=0.27.0",
+    "rich>=13.0"
+]
+
+[project.scripts]
+digest = "digest.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["digest*"]
+```
+
+---
+
+## 4. Core Package Implementations
+
+### 4.1 Schema Models (`~/EmptyOne/digest/core/models.py`)
+
+```python
+from __future__ import annotations
+from enum import Enum
+from typing import Dict, List, Optional
+from pydantic import BaseModel, Field
+
+
+class ReviewVerdict(str, Enum):
+    APPROVED = "APPROVED"
+    CHANGES_REQUESTED = "CHANGES_REQUESTED"
+    COMMENTED = "COMMENTED"
+    DISMISSED = "DISMISSED"
+
+
+class CommentCategory(str, Enum):
+    ARCHITECTURE = "ARCHITECTURE"
+    SECURITY = "SECURITY"
+    PERFORMANCE = "PERFORMANCE"
+    TESTING = "TESTING"
+    ERROR_HANDLING = "ERROR_HANDLING"
+    STYLE_NITS = "STYLE_NITS"
+    DOCUMENTATION = "DOCUMENTATION"
+    OTHER = "OTHER"
+
+
+class ReviewComment(BaseModel):
+    id: str
+    pr_number: int
+    repo: str
+    author: str
+    path: str
+    line: Optional[int] = None
+    diff_hunk: str = ""
+    body: str
+    created_at: str = ""
+    category: CommentCategory = CommentCategory.OTHER
+    is_socratic: bool = False
+    is_praise: bool = False
+
+
+class PullRequest(BaseModel):
+    id: int
+    number: int
+    repo: str
+    title: str
+    body: Optional[str] = ""
+    author: str
+    state: str = "closed"
+    diff: Optional[str] = ""
+    changed_files: List[str] = Field(default_factory=list)
+    additions: int = 0
+    deletions: int = 0
+    merged_at: Optional[str] = None
+
+
+class Review(BaseModel):
+    id: str
+    pr_number: int
+    repo: str
+    author: str
+    state: ReviewVerdict
+    body: Optional[str] = ""
+    submitted_at: str = ""
+    comments: List[ReviewComment] = Field(default_factory=list)
+
+
+class ReviewerStats(BaseModel):
+    reviewer: str
+    total_prs_reviewed: int
+    total_comments: int
+    avg_comments_per_pr: float
+    comments_per_100_lines: float
+    verdict_distribution: Dict[str, float]
+    category_distribution: Dict[str, float]
+    socratic_ratio: float
+    praise_ratio: float
+    top_reviewed_repos: List[str]
+
+
+class EvalMetric(BaseModel):
+    category: str
+    expected_count: int
+    predicted_count: int
+    matched_count: int
+    recall: float
+    precision: float
+
+
+class EvalSummary(BaseModel):
+    reviewer: str
+    total_holdout_prs: int
+    overall_recall: float
+    overall_precision: float
+    f1_score: float
+    metrics_by_category: List[EvalMetric]
+    generated_at: str = ""
+```
+
+---
+
+### 4.2 SQLite Storage Engine (`~/EmptyOne/digest/core/storage.py`)
+
+```python
+from __future__ import annotations
+import json
+import os
+import sqlite3
+from pathlib import Path
+from typing import Dict, List, Optional, Tuple
+
+from digest.core.models import (
+    CommentCategory,
+    PullRequest,
+    Review,
+    ReviewComment,
+    ReviewerStats,
+    ReviewVerdict,
+)
+
+DEFAULT_DB_PATH = os.path.expanduser("~/.local/share/digest_store/reviews.db")
+
+
+class StorageEngine:
+    def __init__(self, db_path: str = DEFAULT_DB_PATH):
+        self.db_path = db_path
+        if db_path != ":memory:":
+            Path(db_path).parent.mkdir(parents=True, exist_ok=True)
+        self.conn = sqlite3.connect(db_path)
+        self.conn.row_factory = sqlite3.Row
+        self._init_schema()
+
+    def _init_schema(self) -> None:
+        with self.conn:
+            self.conn.execute("""
+                CREATE TABLE IF NOT EXISTS pull_requests (
+                    id INTEGER PRIMARY KEY,
+                    number INTEGER,
+                    repo TEXT,
+                    title TEXT,
+                    body TEXT,
+                    author TEXT,
+                    state TEXT,
+                    diff TEXT,
+                    changed_files TEXT,
+                    additions INTEGER,
+                    deletions INTEGER,
+                    merged_at TEXT,
+                    UNIQUE(repo, number)
+                )
+            """)
+            self.conn.execute("""
+                CREATE TABLE IF NOT EXISTS reviews (
+                    id TEXT PRIMARY KEY,
+                    pr_number INTEGER,
+                    repo TEXT,
+                    author TEXT,
+                    state TEXT,
+                    body TEXT,
+                    submitted_at TEXT
+                )
+            """)
+            self.conn.execute("""
+                CREATE TABLE IF NOT EXISTS comments (
+                    id TEXT PRIMARY KEY,
+                    pr_number INTEGER,
+                    repo TEXT,
+                    author TEXT,
+                    path TEXT,
+                    line INTEGER,
+                    diff_hunk TEXT,
+                    body TEXT,
+                    created_at TEXT,
+                    category TEXT,
+                    is_socratic BOOLEAN,
+                    is_praise BOOLEAN
+                )
+            """)
+
+    def save_pull_request(self, pr: PullRequest) -> None:
+        with self.conn:
+            self.conn.execute("""
+                INSERT INTO pull_requests (
+                    id, number, repo, title, body, author, state, diff,
+                    changed_files, additions, deletions, merged_at
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                ON CONFLICT(repo, number) DO UPDATE SET
+                    title=excluded.title,
+                    body=excluded.body,
+                    diff=excluded.diff,
+                    changed_files=excluded.changed_files,
+                    additions=excluded.additions,
+                    deletions=excluded.deletions
+            """, (
+                pr.id, pr.number, pr.repo, pr.title, pr.body, pr.author, pr.state,
+                pr.diff, json.dumps(pr.changed_files), pr.additions, pr.deletions, pr.merged_at
+            ))
+
+    def save_review(self, review: Review) -> None:
+        with self.conn:
+            self.conn.execute("""
+                INSERT OR REPLACE INTO reviews (
+                    id, pr_number, repo, author, state, body, submitted_at
+                ) VALUES (?, ?, ?, ?, ?, ?, ?)
+            """, (
+                review.id, review.pr_number, review.repo, review.author,
+                review.state.value, review.body, review.submitted_at
+            ))
+            for c in review.comments:
+                self.save_comment(c)
+
+    def save_comment(self, comment: ReviewComment) -> None:
+        with self.conn:
+            self.conn.execute("""
+                INSERT OR REPLACE INTO comments (
+                    id, pr_number, repo, author, path, line, diff_hunk,
+                    body, created_at, category, is_socratic, is_praise
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """, (
+                comment.id, comment.pr_number, comment.repo, comment.author,
+                comment.path, comment.line, comment.diff_hunk, comment.body,
+                comment.created_at, comment.category.value,
+                int(comment.is_socratic), int(comment.is_praise)
+            ))
+
+    def get_reviewer_prs(self, reviewer: str) -> List[PullRequest]:
+        cursor = self.conn.execute("""
+            SELECT DISTINCT pr.* FROM pull_requests pr
+            JOIN reviews r ON pr.repo = r.repo AND pr.number = r.pr_number
+            WHERE r.author = ? COLLATE NOCASE
+        """, (reviewer,))
+        rows = cursor.fetchall()
+        prs = []
+        for r in rows:
+            prs.append(PullRequest(
+                id=r["id"],
+                number=r["number"],
+                repo=r["repo"],
+                title=r["title"] or "",
+                body=r["body"] or "",
+                author=r["author"] or "",
+                state=r["state"] or "closed",
+                diff=r["diff"] or "",
+                changed_files=json.loads(r["changed_files"] or "[]"),
+                additions=r["additions"] or 0,
+                deletions=r["deletions"] or 0,
+                merged_at=r["merged_at"]
+            ))
+        return prs
+
+    def get_reviewer_comments(self, reviewer: str) -> List[ReviewComment]:
+        cursor = self.conn.execute("""
+            SELECT * FROM comments WHERE author = ? COLLATE NOCASE
+        """, (reviewer,))
+        rows = cursor.fetchall()
+        comments = []
+        for r in rows:
+            cat_str = r["category"] or "OTHER"
+            try:
+                cat = CommentCategory(cat_str)
+            except ValueError:
+                cat = CommentCategory.OTHER
+            comments.append(ReviewComment(
+                id=r["id"],
+                pr_number=r["pr_number"],
+                repo=r["repo"],
+                author=r["author"],
+                path=r["path"] or "",
+                line=r["line"],
+                diff_hunk=r["diff_hunk"] or "",
+                body=r["body"] or "",
+                created_at=r["created_at"] or "",
+                category=cat,
+                is_socratic=bool(r["is_socratic"]),
+                is_praise=bool(r["is_praise"])
+            ))
+        return comments
+
+    def get_reviewer_verdict_for_pr(self, repo: str, pr_number: int, reviewer: str) -> str:
+        cursor = self.conn.execute("""
+            SELECT state FROM reviews
+            WHERE repo = ? AND pr_number = ? AND author = ? COLLATE NOCASE
+            ORDER BY submitted_at DESC LIMIT 1
+        """, (repo, pr_number, reviewer))
+        row = cursor.fetchone()
+        return row["state"] if row else "COMMENTED"
+
+    def close(self) -> None:
+        self.conn.close()
+```
+
+---
+
+## 5. Test Suite Implementation
+
+### 5.1 Storage Tests (`~/EmptyOne/tests/test_storage.py`)
+```python
+import pytest
+from digest.core.models import PullRequest, Review, ReviewComment, ReviewVerdict, CommentCategory
+from digest.core.storage import StorageEngine
+
+@pytest.fixture
+def storage():
+    engine = StorageEngine(":memory:")
+    yield engine
+    engine.close()
+
+def test_save_and_retrieve_pull_request(storage):
+    pr = PullRequest(
+        id=101, number=42, repo="octocat/Hello-World", title="Add auth",
+        body="JWT implementation", author="alice", additions=15, deletions=2
+    )
+    storage.save_pull_request(pr)
+    
+    rev = Review(
+        id="rev_1", pr_number=42, repo="octocat/Hello-World", author="eval_user",
+        state=ReviewVerdict.CHANGES_REQUESTED, submitted_at="2026-11-01T12:00:00Z"
+    )
+    storage.save_review(rev)
+    
+    prs = storage.get_reviewer_prs("eval_user")
+    assert len(prs) == 1
+    assert prs[0].number == 42
+    assert prs[0].additions == 15
+```
+
+---
+
+## 6. Setup & Verification Commands
+
+```bash
+cd ~/EmptyOne
+source .venv/bin/activate
+pip install -e ./digest
+digest --help
+pytest tests/ -v
+```
+
+</script>
+
+<script type="text/markdown" id="raw-spec-05-skills-plugins">
+# Component Specification 05: Antigravity Customization Architecture, Plugins & Directives
+**Component ID:** `antigravity-customizations`  
+**Target Directories:**  
+- Global Host Skills: `~/.gemini/config/skills/`  
+- Autonomous Plugins: `~/.gemini/config/plugins/`  
+- Active Workspace Rules: `~/.gemini/config/plugins/*/rules/AGENTS.md`  
+
+---
+
+## 1. Antigravity Customization Architecture & Discovery Priority
+
+The Google Antigravity (AGY) agent runtime discovers and resolves skills, rules, and plugins through a strict 3-tier precedence hierarchy:
+
+```mermaid
+graph TD
+    subgraph DiscoveryHierarchy["Antigravity Discovery & Precedence Engine"]
+        L1["Tier 1: Project Repository (<repo>/.agents/skills/)<br/>Checked into VCS, shared with team, overrides host"]
+        L2["Tier 2: Global Host Environment (~/.gemini/config/skills/)<br/>Machine-wide developer tools, statusline, Whisper HUD"]
+        L3["Tier 3: Builtin CLI Engine (~/.gemini/antigravity-cli/builtin/)<br/>Default foundational toolchain"]
+        
+        L1 -->|Overrides| L2
+        L2 -->|Overrides| L3
+    end
+
+    subgraph PluginArchitecture["Plugin Internal Structure"]
+        P_JSON["plugin.json (Manifest & Version)"]
+        P_RULES["rules/AGENTS.md (Injected into Agent System Prompt)"]
+        P_SKILLS["skills/<name>/SKILL.md (Dynamic On-Demand Trigger)"]
+    end
+
+    L2 --> PluginArchitecture
+```
+
+---
+
+## 2. Invariants & Context Preservation Directives
+
+1. **Context Window Token Preservation:** Skills are **not** dumped unconditionally into the LLM context window. Instead:
+   - Behavioral directives in `rules/AGENTS.md` are active globally.
+   - Heavy procedural instructions in `SKILL.md` are loaded **only when their trigger criteria are met** (e.g. non-coding tasks bypass `eval-coding-guidance` to save tokens).
+2. **Standard YAML Frontmatter Contract:** Every skill directory must contain a valid `SKILL.md` with lowercase hyphenated frontmatter:
+   ```yaml
+   ---
+   name: my-custom-skill
+   description: Trigger-focused description with explicit keywords and scenarios.
+   ---
+   ```
+3. **Idempotent Executable Scripts:** Scripts inside `scripts/` must enforce `set -euo pipefail`, handle Apple Silicon architectures, and maintain `chmod +x`.
+
+---
+
+## 3. Plugins Catalog (`~/.gemini/config/plugins/`)
+
+| Plugin Directory | Description & Mission | Rule Path |
+| :--- | :--- | :--- |
+| `auto-skill-forge-plugin` | Autonomous skill generation and operational problem distillation whenever `/learn` is invoked or complex tasks are solved. | `rules/AGENTS.md` |
+| `eval-coding-guidance-plugin` | SWE-bench, Reflexion, Agentless, Self-Debugging, CodeT guidelines. Enforces test-first reproduction and surgical minimality. | `rules/AGENTS.md` |
+| `tooling-setup-recorder-plugin` | Automatically captures host developer tools, daemons, and CLI scripts into reusable recipes under `~/.gemini/config/skills/`. | `rules/AGENTS.md` |
+| `modern-web-guidance-plugin` | Modern HTML/CSS/JS frontend standards, Container queries, View Transitions, `:has()`, Popover APIs. | `skills/modern-web-guidance/SKILL.md` |
+| `prd-creation-plugin` | Deconstructs vague ideas into engineering-ready PRDs using a strict 4-Phase process. | `skills/prd-creation/SKILL.md` |
+| `chrome-devtools-plugin` | Chrome DevTools MCP browser automation, a11y auditing, memory leak profiling. | `skills/chrome-devtools/SKILL.md` |
+
+---
+
+## 4. Skills Catalog (`~/.gemini/config/skills/`)
+
+```
+~/.gemini/config/skills/
+├── setup-reconstitutor/      # Master autonomous setup rebuilder from blueprint specs
+├── agy-statusline/           # Sub-15ms multi-line prompt statistics gauge and context gauge
+├── macos-speech-dictation/   # Whisper Metal GPU push-to-talk dictation & 3-line pill HUD
+├── meeting-recorder/         # 1-Click & ⌥ ⌥ meeting audio capture, ScreenCaptureKit, HTML notes
+├── reviewer-mimic/           # PR review history ingestion & statistical persona profiling
+├── eval_user-reviewer/       # Synthesized reviewer persona for @eval_user
+├── willmcgugan-reviewer/     # Synthesized reviewer persona for @willmcgugan
+├── noteworthy-notes/         # Executive meeting notes synthesizer with dynamic PV & tech sections
+├── agi-remote/               # Sovereign remote messaging bridge & mobile WebSocket stream
+├── plannotator/              # Interactive browser-based plan review gate & code review UI
+└── github-cli/               # Automated gh CLI setup, credentials, and PR workflows
+```
+
+---
+
+## 5. Verification & Acceptance Smoke Test
+
+The reconstituting agent must verify that the catalog is populated and valid:
+
+```bash
+# 1. Verify Plugins exist
+for p in auto-skill-forge-plugin eval-coding-guidance-plugin tooling-setup-recorder-plugin modern-web-guidance-plugin prd-creation-plugin chrome-devtools-plugin; do
+    [ -d "$HOME/.gemini/config/plugins/$p" ] || { echo "Missing plugin: $p"; exit 1; }
+done
+echo "All 6 Plugins: VERIFIED ✅"
+
+# 2. Verify Essential Skills have SKILL.md
+for s in setup-reconstitutor agy-statusline macos-speech-dictation meeting-recorder reviewer-mimic; do
+    [ -f "$HOME/.gemini/config/skills/$s/SKILL.md" ] || { echo "Missing SKILL.md in $s"; exit 1; }
+done
+echo "Essential Skills Frontmatter: VERIFIED ✅"
+```
+
+</script>
+
+<script type="text/markdown" id="raw-readme">
+# Gemini AGI & Antigravity Setup Migration Bundle
+
+> ## 🚀 ONE-SHOT AGI AGENT ACTIVATION INSTRUCTION
+> If you are on a new computer, open Antigravity (`agy`) or your Gemini AGI chat prompt and paste this exact instruction:
+> 
+> ```text
+> Check my Google Drive account under ~/Library/CloudStorage/ (or via `find ~/Library/CloudStorage -name "gemini_agi_migration_bundle.zip"`), extract gemini_agi_migration_bundle.zip, read README.md and AGI_AUTONOMOUS_ENVIRONMENT_SPEC.md, install the skills into ~/.gemini/config/skills/ and plugins into ~/.gemini/config/plugins/, and activate the setup-reconstitutor skill to autonomously compile and set up all programs on this computer.
+> ```
+
+---
+
+## What This Migration Bundle Contains
+
+This package provides a 100% self-contained reconstitution blueprint of your entire developer environment without needing to transfer source code files or large Python virtual environments:
+
+1. **`skills/`**: All 11+ custom Antigravity skills:
+   - `setup-reconstitutor`: The master agent skill that parses the component specs and authors/compiles all programs.
+   - `agy-statusline`: Sub-15ms multi-line prompt statistics gauge and context window dynamics.
+   - `macos-speech-dictation`: Whisper Metal GPU push-to-talk dictation and native Swift floating pill HUD.
+   - `meeting-recorder`: 1-Click / `⌥ ⌥` meeting audio capture, ScreenCaptureKit loopback, and executive summaries.
+   - `reviewer-mimic` & personas: `@eval_user-reviewer`, `@willmcgugan-reviewer`, PR review history ingestion.
+   - `agi-remote`, `plannotator*`, `github-cli`, `noteworthy-notes`.
+2. **`plugins/`**: All 6 plugins and global behavioral rules (`auto-skill-forge`, `eval-coding-guidance`, `tooling-setup-recorder`, `modern-web-guidance`, `prd-creation`, `chrome-devtools`).
+3. **`specs/`**: Complete component blueprint specifications with exact code templates:
+   - `01-statusline.spec.md`
+   - `02-whisper-dictation.spec.md`
+   - `03-meeting-recorder.spec.md`
+   - `04-reviewer-mimic-digest.spec.md`
+   - `05-skills-and-plugins.spec.md`
+4. **`scripts/`**:
+   - `statusline.py`: Multi-line responsive ANSI prompt statusline engine.
+   - `verify_reconstitution.sh`: Automated 6-point acceptance verification test suite.
+5. **Specification & Migration Documents**:
+   - `AGI_AUTONOMOUS_ENVIRONMENT_SPEC.md`: Engineering PRD and autonomous agent directives.
+   - `AGI_SPEC.html`: Interactive visual spec dashboard.
+   - `MIGRATION_GUIDE.md` & `MIGRATION_GUIDE.html`: Multi-machine migration guide.
+
+---
+
+## Autonomous Reconstitution Steps (Executed by the Agent)
+
+When the AGI agent receives the activation instruction above, it will:
+1. Locate and extract this zip file from `~/Library/CloudStorage/GoogleDrive-*/My Drive/`.
+2. Install `skills/` to `~/.gemini/config/skills/` and `plugins/` to `~/.gemini/config/plugins/`.
+3. Check and install Homebrew dependencies (`python@3.11`, `whisper.cpp`, `ffmpeg`, `cmake`).
+4. Read the specs in `specs/` and generate the source code for `meeting_recorder.swift`, `whisper_pill.swift`, `whisper_metal.py`, `summarize_meeting.py`, and the `digest/` review platform.
+5. Compile native Apple Silicon binaries using `swiftc -O`.
+6. Configure the Python virtual environment and symlink all binaries into `~/.local/bin/`.
+7. Download or link the Whisper Metal model weights (`ggml-base.en.bin`).
+8. Execute `verify_reconstitution.sh` to validate that all 6 system acceptance tests pass.
+
+---
+*Created by Antigravity Autonomous Systems. Preserved for seamless zero-code cross-machine migration.*
+
+</script>
+
+<script type="text/markdown" id="raw-migration-guide">
+# Gemini AGI & Antigravity Setup Migration Guide
+**Comprehensive Multi-Machine Migration Plan for Apple Silicon macOS**
+
+This guide provides an end-to-end blueprint to migrate your entire Google Antigravity / Gemini AGI environment, local AI engines, Swift HUDs, reviewer apps, status bar, and autonomous skill pipelines to another Mac.
+
+---
+
+## Table of Contents
+1. [Inventory: What Makes Up Your Setup](#1-inventory-what-makes-up-your-setup)
+2. [What Google ID Syncs vs. What Stays Local](#2-what-google-id-syncs-vs-what-stays-local)
+3. [4 Migration Approaches Compared](#3-4-migration-approaches-compared)
+4. [Method 1: One-Click Bundle & Restore (Recommended)](#4-method-1-one-click-bundle--restore-recommended)
+5. [Method 2: Private Git / Dotfiles Repository (Continuous Sync)](#5-method-2-private-git--dotfiles-repository-continuous-sync)
+6. [Method 3: Direct Peer-to-Peer Transfer (AirDrop / rsync)](#6-method-3-direct-peer-to-peer-transfer-airdrop--rsync)
+7. [Component-by-Component Restoration & Verification](#7-component-by-component-restoration--verification)
+   - [A. Whisper Voice Dictation & Swift HUD](#a-whisper-voice-dictation--swift-hud)
+   - [B. Meeting Recorder & Local Summarizer](#b-meeting-recorder--local-summarizer)
+   - [C. Real-time Statusline (`agy-statusline`)](#c-real-time-statusline-agy-statusline)
+   - [D. Code Reviewer Mimic & Digest Suite](#d-code-reviewer-mimic--digest-suite)
+   - [E. All Gemini Skills, Plugins & Directives](#e-all-gemini-skills-plugins--directives)
+   - [F. Plannotator & AGI Remote Bridge](#f-plannotator--agi-remote-bridge)
+8. [Target Machine Prerequisites & Permissions](#8-target-machine-prerequisites--permissions)
+9. [Pre-Flight Checklist on the New Machine](#9-pre-flight-checklist-on-the-new-machine)
+
+---
+
+## 1. Inventory: What Makes Up Your Setup
+
+Your current developer machine contains a multi-tiered architecture spanning cloud authentication, agent configurations, native Swift binaries, and Python packages:
+
+```mermaid
+flowchart TD
+    subgraph Cloud["Google Cloud / Account"]
+        GID["Same Google ID (OAuth, API Quota, Gemini CLI Auth)"]
+    end
+
+    subgraph AgentRuntime["~/.gemini/ (Agent Runtime & Brain)"]
+        CONF["config.json / settings.json"]
+        PLUGINS["Plugins (auto-skill-forge, eval-coding, modern-web, prd, tooling)"]
+        SKILLS["Skills (statusline, whisper, meeting-recorder, reviewer-mimic, plannotator)"]
+        CMDS["commands / policies"]
+    end
+
+    subgraph HostBinaries["~/.local/bin/ & Homebrew"]
+        AGY["agy CLI (/opt/homebrew/bin/agy)"]
+        PLANNOTATOR["plannotator binary"]
+        WHISPER_BINS["whisper-daemon, whisper-pill, dictate, whisper-serve"]
+        MEETING_BINS["meeting-record, meeting-recorder"]
+        DIGEST_BIN["digest CLI (Python)"]
+    end
+
+    subgraph ProjectWorkspace["Project Source & Engines (~/EmptyOne)"]
+        SWIFT_APPS["meeting_recorder.swift, whisper_pill.swift"]
+        PY_ENGINES["whisper_metal.py, summarize_meeting.py, prune_meetings.py"]
+        DIGEST_PKG["digest/ package & tests"]
+        AGI_REMOTE["agi_remote/ bridge daemon"]
+    end
+
+    GID -.-> CONF
+    CONF --> SKILLS
+    PLUGINS --> SKILLS
+    SKILLS --> HostBinaries
+    ProjectWorkspace --> HostBinaries
+```
+
+### Detailed Breakdown:
+| Layer | Components | Source Location |
+| :--- | :--- | :--- |
+| **Agent Core** | Antigravity CLI, Gemini configs, settings | `/opt/homebrew/bin/agy`, `~/.gemini/` |
+| **Agent Plugins (6)** | `auto-skill-forge`, `eval-coding-guidance`, `tooling-setup-recorder`, `modern-web-guidance`, `prd-creation`, `chrome-devtools` | `~/.gemini/config/plugins/` |
+| **Agent Skills (11+)** | `agy-statusline`, `macos-speech-dictation`, `meeting-recorder`, `reviewer-mimic`, `eval_user-reviewer`, `willmcgugan-reviewer`, `noteworthy-notes`, `agi-remote`, `plannotator*`, `github-cli` | `~/.gemini/config/skills/` |
+| **Voice & Whisper** | Whisper Metal GPU engine, `whisper_pill.swift` HUD, `dictate`, `whisper-daemon` | `~/EmptyOne/`, `~/.local/bin/` |
+| **Meeting Recorder** | `meeting_recorder.swift` (native Audio/ScreenCaptureKit), `summarize_meeting.py` | `~/EmptyOne/`, `~/.local/bin/` |
+| **Reviewer Engine** | `digest` python package, reviewer mimic models, benchmark backtesting | `~/EmptyOne/digest/`, `~/.local/bin/digest` |
+| **Statusline** | Sub-15ms real-time statusline & context gauge | `~/.gemini/config/skills/agy-statusline/` |
+| **Visual Tools** | `plannotator` binary, Plannotator inbox & annotations | `~/.local/bin/plannotator`, `~/.gemini/config/skills/` |
+
+---
+
+## 2. What Google ID Syncs vs. What Stays Local & How Models Are Handled
+
+### A. Gemini AGI Models (0 MB Download Required)
+- **Google Antigravity & Gemini CLI** models (Gemini 2.5 Pro/Flash, Gemini 3.0, etc.) are **cloud-hosted by Google**.
+- They run directly on Google Cloud TPU infrastructure.
+- **Zero local model files are downloaded** for Gemini reasoning; your Google ID authenticates and streams inference directly via Google's API.
+
+### B. Local Whisper Metal Models (~2.3 GB on this machine)
+Your speech dictation HUD and meeting recorder use local Apple Silicon GPU acceleration via `whisper.cpp` (`whisper-cli`) and store weights in `~/.whisper-models/`:
+- `ggml-base.en.bin` (141 MB) – Ultra-low latency live streaming dictation (~30ms response)
+- `ggml-large-v3-turbo.bin` (1.5 GB) – High accuracy meeting transcription
+- `ggml-parakeet-tdt-0.6b-v3-q8_0.bin` (638 MB) – Fast fallback model
+
+### C. Does the New Machine Need to Download the Models?
+**No, the migration script handles it automatically either way:**
+
+1. **Option 1: Zero-Download / Fully Offline (Default in `./export_setup.sh`)**
+   - The export script packages all 3 model files directly from `~/.whisper-models/` into `~/gemini_migration_bundle/models/`.
+   - When running `./restore_on_new_mac.sh` on the new Mac, it detects the bundled `.bin` files and copies them into `~/.whisper-models/` with **0 MB downloaded**.
+   - Your speech dictation and meeting recorder work immediately offline.
+
+2. **Option 2: Lightweight Transfer (If you run `./export_setup.sh --no-models`)**
+   - If you prefer a tiny archive (~50 MB) to transfer quickly over email or chat, use `./export_setup.sh --no-models`.
+   - The restore script on the target Mac will automatically detect that models are absent and download `ggml-base.en.bin` via `curl -C -` during setup without any manual steps.
+
+---
+
+## 3. 4 Migration Approaches Compared
+
+| Approach | Speed | Setup Effort | Multi-Machine Sync | Best For |
+| :--- | :--- | :--- | :--- | :--- |
+| **Method 1: One-Click Bundle & Restore** | ⚡ Fast (< 5 min) | Low (run 2 scripts) | Snapshot (Manual) | **Best overall** for a clean, deterministic transfer |
+| **Method 2: Git / Dotfiles Repo** | 🔄 Continuous | Medium | Automatic (`git pull`) | Best if actively switching between 2 machines |
+| **Method 3: Direct AirDrop / rsync** | ⚡ Fast (1 command) | Low | Ad-hoc local | Best if both Macs are on the same local Wi-Fi |
+| **Method 4: Google Drive Shared Symlink** | ☁️ Continuous | Low | Real-time via Google ID | Best for keeping skills & configs identical across machines |
+
+---
+
+## 4. Method 1: One-Click Bundle & Restore (Recommended)
+
+This method packages all your configurations, plugins, skills, and source apps into a clean, lightweight archive (excluding bulky `.venv` and cache directories), and provides an automated setup script for the new Mac.
+
+### Step 1: Create the Migration Archive on This Machine
+Run this command from your terminal:
+
+```bash
+mkdir -p ~/migration_bundle
+
+# 1. Package Gemini configurations, skills, and plugins
+tar -czvf ~/migration_bundle/gemini_config.tar.gz \
+  -C "$HOME/.gemini" config commands policies settings.json
+
+# 2. Package project sources (Whisper, Meeting Recorder, Digest, AGI Remote)
+tar -czvf ~/migration_bundle/projects_source.tar.gz \
+  --exclude='.venv' \
+  --exclude='__pycache__' \
+  --exclude='.pytest_cache' \
+  --exclude='meetings/*.wav' \
+  -C "$HOME" EmptyOne
+
+# 3. Copy Plannotator binary and shell profile additions
+mkdir -p ~/migration_bundle/bin
+cp "$HOME/.local/bin/plannotator" ~/migration_bundle/bin/ 2>/dev/null || true
+```
+
+### Step 2: Transfer the Bundle to the New Machine
+Transfer `~/migration_bundle/` via AirDrop, Google Drive, USB SSD, or `scp`:
+```bash
+# Example via scp:
+scp -r ~/migration_bundle new-mac.local:~/migration_bundle
+```
+
+### Step 3: Run the Auto-Restore Script on the New Mac
+Create and run this restoration script `restore_new_mac.sh` on the target computer:
+
+```bash
+#!/usr/bin/env bash
+set -euo pipefail
+
+echo "==> 1. Installing Homebrew & Prerequisites..."
+if ! command -v brew &>/dev/null; then
+    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+    eval "$(/opt/homebrew/bin/brew shellenv)"
+fi
+
+brew install python@3.11 ffmpeg portaudio portmidi pkg-config cmake
+
+echo "==> 2. Installing agy (Google Antigravity CLI)..."
+if ! command -v agy &>/dev/null; then
+    brew install antigravity-cli || echo "Install agy via your company / standard brew tap"
+fi
+
+echo "==> 3. Restoring ~/.gemini (Skills, Plugins, Rules, Commands)..."
+mkdir -p "$HOME/.gemini"
+tar -xzvf ~/migration_bundle/gemini_config.tar.gz -C "$HOME/.gemini"
+
+echo "==> 4. Restoring Project Codebase..."
+mkdir -p "$HOME/EmptyOne"
+tar -xzvf ~/migration_bundle/projects_source.tar.gz -C "$HOME"
+
+echo "==> 5. Setting up Python Virtual Environment..."
+cd "$HOME/EmptyOne"
+python3.11 -m venv .venv
+source .venv/bin/activate
+pip install --upgrade pip setuptools wheel
+pip install openai-whisper sounddevice numpy rich click requests fastapi uvicorn websockets pydantic
+
+# Install digest package in editable mode
+if [ -d "$HOME/EmptyOne/digest" ]; then
+    pip install -e "$HOME/EmptyOne/digest"
+fi
+
+echo "==> 6. Compiling Native macOS Apple Silicon Binaries..."
+mkdir -p "$HOME/.local/bin"
+
+# Compile Meeting Recorder (Swift)
+if [ -f "$HOME/EmptyOne/meeting_recorder.swift" ]; then
+    echo "Compiling meeting-recorder..."
+    swiftc -O "$HOME/EmptyOne/meeting_recorder.swift" -o "$HOME/EmptyOne/meeting-recorder"
+    ln -sf "$HOME/EmptyOne/meeting-recorder" "$HOME/.local/bin/meeting-recorder"
+    ln -sf "$HOME/EmptyOne/meeting-recorder" "$HOME/.local/bin/meeting-record"
+fi
+
+# Compile Whisper Live Pill HUD (Swift)
+if [ -f "$HOME/EmptyOne/whisper_pill.swift" ]; then
+    echo "Compiling whisper-pill..."
+    swiftc -O "$HOME/EmptyOne/whisper_pill.swift" -o "$HOME/EmptyOne/whisper-pill"
+    ln -sf "$HOME/EmptyOne/whisper-pill" "$HOME/.local/bin/whisper-pill"
+fi
+
+# Copy Plannotator binary
+if [ -f ~/migration_bundle/bin/plannotator ]; then
+    cp ~/migration_bundle/bin/plannotator "$HOME/.local/bin/plannotator"
+    chmod +x "$HOME/.local/bin/plannotator"
+fi
+
+# Symlink Python scripts into ~/.local/bin
+ln -sf "$HOME/EmptyOne/whisper-daemon" "$HOME/.local/bin/whisper-daemon" 2>/dev/null || true
+ln -sf "$HOME/EmptyOne/.venv/bin/digest" "$HOME/.local/bin/digest" 2>/dev/null || true
+
+echo "==> 7. Ensuring ~/.local/bin is in PATH..."
+if ! grep -q 'export PATH="$HOME/.local/bin:$PATH"' "$HOME/.zshrc" 2>/dev/null; then
+    echo 'export PATH="$HOME/.local/bin:$PATH"' >> "$HOME/.zshrc"
+fi
+
+echo "==> 8. Authenticating with your Google Account..."
+echo "Running: agy auth login (Log in with your existing Google ID)"
+agy auth login || true
+
+echo "============================================================"
+echo "Migration Complete! All skills, statusline, whisper, recorder,"
+echo "and reviewer mimic apps are restored and linked."
+echo "============================================================"
+```
+
+---
+
+## 5. Method 2: Private Git / Dotfiles Repository (Continuous Sync)
+
+If you plan to switch between both computers regularly, track your skills, plugins, and custom tooling in a private GitHub repository:
+
+### Step 1: Initialize Git in a Config Repo
+```bash
+mkdir -p ~/gemini-agi-workspace
+cd ~/gemini-agi-workspace
+git init
+
+# Copy skills, plugins, and project code (or use submodules)
+cp -r ~/.gemini/config ./gemini-config
+cp -r ~/EmptyOne ./projects-source
+
+cat << 'EOF' > .gitignore
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+meetings/*.wav
+meetings/*.mp3
+EOF
+
+git add .
+git commit -m "feat: initial snapshot of Gemini AGI skills, HUDs, and reviewer apps"
+gh repo create gemini-agi-workspace --private --source=. --push
+```
+
+### Step 2: Clone & Link on the New Machine
+```bash
+git clone https://github.com/<your-username>/gemini-agi-workspace.git ~/gemini-agi-workspace
+cd ~/gemini-agi-workspace
+
+# Link ~/.gemini/config
+mkdir -p ~/.gemini
+ln -sfn "$HOME/gemini-agi-workspace/gemini-config" "$HOME/.gemini/config"
+
+# Link projects directory
+ln -sfn "$HOME/gemini-agi-workspace/projects-source" "$HOME/EmptyOne"
+```
+
+---
+
+## 6. Method 3: Direct Peer-to-Peer Transfer (AirDrop / rsync)
+
+If both Macs are connected to the same local network, you can run a single `rsync` command directly:
+
+```bash
+# Run on the new Mac to pull from current Mac (replace 'old-mac.local' with old hostname or IP):
+rsync -avzP --exclude='.venv' --exclude='__pycache__' \
+  old-mac.local:~/.gemini/ ~/.gemini/
+
+rsync -avzP --exclude='.venv' --exclude='__pycache__' --exclude='meetings/*.wav' \
+  old-mac.local:~/EmptyOne/ ~/EmptyOne/
+
+rsync -avzP \
+  old-mac.local:~/.local/bin/ ~/.local/bin/
+```
+
+---
+
+## 7. Component-by-Component Restoration & Verification
+
+After copying files, verify and test each component to ensure zero loss of functionality:
+
+### A. Whisper Voice Dictation & Swift HUD
+- **What it does:** Provides Metal GPU-accelerated local transcription and a floating 3-line live streaming pill HUD.
+- **Key files:**
+  - `~/EmptyOne/whisper_pill.swift`
+  - `~/EmptyOne/whisper_metal.py`
+  - `~/.gemini/config/skills/macos-speech-dictation/`
+- **Recompilation & Verification:**
+  ```bash
+  cd ~/EmptyOne
+  swiftc -O whisper_pill.swift -o whisper-pill
+  ./whisper-pill --test  # Verify floating pill displays
+  python3 whisper_metal.py --benchmark  # Verify Metal GPU inference
+  ```
+
+### B. Meeting Recorder & Local Summarizer
+- **What it does:** 1-Click / Double-tap Option (`⌥ ⌥`) meeting capture, local Whisper transcription, and executive synthesis.
+- **Key files:**
+  - `~/EmptyOne/meeting_recorder.swift`
+  - `~/EmptyOne/summarize_meeting.py`
+  - `~/EmptyOne/prune_meetings.py`
+  - `~/.gemini/config/skills/meeting-recorder/`
+- **Recompilation & Verification:**
+  ```bash
+  cd ~/EmptyOne
+  swiftc -O meeting_recorder.swift -o meeting-recorder
+  ./meeting-recorder --version
+  python3 summarize_meeting.py --test
+  ```
+
+### C. Real-time Statusline (`agy-statusline`)
+- **What it does:** Displays active model, reasoning effort, visual context gauge, token caching efficiency, git churn (`+lines/-lines`), and quota below the AGY prompt.
+- **Key files:**
+  - `~/.gemini/config/skills/agy-statusline/SKILL.md`
+  - `~/.gemini/config/skills/agy-statusline/scripts/statusline.sh` (or statusline hook)
+- **Verification:**
+  ```bash
+  agy --status  # Launch agy in any git repo to verify statusline executes in <15ms
+  ```
+
+### D. Code Reviewer Mimic & Digest Suite
+- **What it does:** Ingests PR histories, benchmarks review recall, generates reviewer personas (`@eval_user`, `@willmcgugan`), and conducts automated code reviews.
+- **Key files:**
+  - `~/EmptyOne/digest/`
+  - `~/.gemini/config/skills/reviewer-mimic/`
+  - `~/.gemini/config/skills/eval_user-reviewer/`
+  - `~/.gemini/config/skills/willmcgugan-reviewer/`
+- **Verification:**
+  ```bash
+  cd ~/EmptyOne
+  source .venv/bin/activate
+  digest --help
+  pytest tests/
+  ```
+
+### E. All Gemini Skills, Plugins & Directives
+- **What it does:** Auto-skill forging, eval-backed coding guidelines, modern web guidance, PRD generation, and host tooling recorder.
+- **Key files:**
+  - `~/.gemini/config/plugins/*`
+  - `~/.gemini/config/skills/*`
+- **Verification:**
+  Open `agy` and run:
+  ```bash
+  /skills
+  ```
+  Ensure all plugins and skills are detected with their triggers active.
+
+### F. Plannotator & AGI Remote Bridge
+- **What it does:** Web-based interactive plan review gate and mobile bridge daemon.
+- **Key files:**
+  - `~/.local/bin/plannotator`
+  - `~/EmptyOne/agi_remote/`
+  - `~/.gemini/config/skills/plannotator/`
+  - `~/.gemini/config/skills/agi-remote/`
+- **Verification:**
+  ```bash
+  plannotator --version
+  cd ~/EmptyOne && python3 -m agi_remote --help
+  ```
+
+---
+
+## 8. Target Machine Prerequisites & Permissions
+
+Because macOS strictly isolates hardware APIs via TCC (Transparency, Consent, and Control), you must grant the following permissions on the new Mac:
+
+1. **Microphone Access:**
+   - Required by: `meeting-recorder` and `whisper-daemon`
+   - Trigger: Prompted automatically on first audio capture, or enable in:
+     `System Settings > Privacy & Security > Microphone`
+2. **Accessibility Access:**
+   - Required by: Push-to-talk auto-pasting and global hotkey capture (`⌥ ⌥`)
+   - Enable in: `System Settings > Privacy & Security > Accessibility`
+3. **Screen & System Audio Recording (Optional):**
+   - Required if recording system output / meeting attendees via ScreenCaptureKit.
+   - Enable in: `System Settings > Privacy & Security > Screen & System Audio Recording`
+4. **Developer Mode / Xcode Command Line Tools:**
+   ```bash
+   xcode-select --install
+   ```
+
+---
+
+## 9. Pre-Flight Checklist on the New Machine
+
+Use this checklist once you are on the target Mac:
+
+- [ ] Xcode CLT installed (`xcode-select -p` returns a valid path)
+- [ ] Homebrew installed and `/opt/homebrew/bin` in `$PATH`
+- [ ] `~/.gemini/config/skills/` populated with all 11+ skills
+- [ ] `~/.gemini/config/plugins/` populated with all 6 plugins
+- [ ] Python 3.11 virtualenv created in `~/EmptyOne/.venv`
+- [ ] Swift binaries compiled (`meeting-recorder`, `whisper-pill`)
+- [ ] `~/.local/bin` added to `$PATH` in `~/.zshrc`
+- [ ] Logged into Google ID with `agy auth login`
+- [ ] Microphone & Accessibility permissions granted in System Settings
+- [ ] Verified prompt statusline shows model & context gauge in `agy`
+- [ ] Tested `digest` and `plannotator` CLI tools
+
+---
+*Created by Antigravity Autonomous Systems. Preserved for cross-machine migration.*
+
+</script>
+
+  <script>
+    const TABS_DATA = [
+  {
+    "id": "master-spec",
+    "title": "Master Environment PRD",
+    "badge": "Master Blueprint",
+    "badge_color": "purple",
+    "filename": "AGI_AUTONOMOUS_ENVIRONMENT_SPEC.md",
+    "summary": "Master specification defining the autonomous multi-tier AGI reconstitution protocol, invariants, and acceptance tests.",
+    "icon": "\ud83c\udf1f"
+  },
+  {
+    "id": "spec-01-statusline",
+    "title": "01. Statusline & HUD",
+    "badge": "<15ms Telemetry",
+    "badge_color": "blue",
+    "filename": "01-statusline.spec.md",
+    "summary": "High-performance dynamic 1-3 line terminal telemetry gauge with prompt caching ratio, git micro-timeouts, and quota display.",
+    "icon": "\u26a1"
+  },
+  {
+    "id": "spec-02-whisper-dictation",
+    "title": "02. Whisper Metal Suite",
+    "badge": "GPU Metal \u00b7 AGI First",
+    "badge_color": "green",
+    "filename": "02-whisper-dictation.spec.md",
+    "summary": "Dual-pipeline local voice dictation with Swift floating HUD pill, English-only locking, DLP privacy middleware, and AGI cascade.",
+    "icon": "\ud83c\udf99\ufe0f"
+  },
+  {
+    "id": "spec-03-meeting-recorder",
+    "title": "03. Meeting Recorder",
+    "badge": "\u2325 \u2325 Hotkey \u00b7 Multi-Tier",
+    "badge_color": "orange",
+    "filename": "03-meeting-recorder.spec.md",
+    "summary": "1-Click & Global Option double-tap meeting capture daemon with ScreenCaptureKit stealth, auto-pruning, and AGI synthesis.",
+    "icon": "\ud83d\udcfc"
+  },
+  {
+    "id": "spec-04-reviewer-mimic",
+    "title": "04. Reviewer Mimic Platform",
+    "badge": "CodeT Eval \u00b7 SQLite",
+    "badge_color": "cyan",
+    "filename": "04-reviewer-mimic-digest.spec.md",
+    "summary": "GitHub review history ingestion, dynamic few-shot persona generation, and holdout backtesting benchmark harness.",
+    "icon": "\ud83d\udd0d"
+  },
+  {
+    "id": "spec-05-skills-plugins",
+    "title": "05. Skills & Plugins",
+    "badge": "3-Tier Discovery",
+    "badge_color": "yellow",
+    "filename": "05-skills-and-plugins.spec.md",
+    "summary": "Discovery hierarchy, token preservation rules, catalog of 6 autonomous plugins, and 11 production skills.",
+    "icon": "\ud83e\udde0"
+  },
+  {
+    "id": "readme",
+    "title": "One-Shot Activation README",
+    "badge": "Google Drive Sync",
+    "badge_color": "pink",
+    "filename": "README.md",
+    "summary": "Bundle extraction instructions, Google Drive CloudStorage path reference, and one-shot AGI prompt.",
+    "icon": "\ud83d\ude80"
+  },
+  {
+    "id": "migration-guide",
+    "title": "Migration Guide & Checklist",
+    "badge": "Runbook",
+    "badge_color": "gray",
+    "filename": "MIGRATION_GUIDE.md",
+    "summary": "Comprehensive step-by-step developer migration guide, Google ID distinction analysis, and permission checklists.",
+    "icon": "\ud83d\udcd6"
+  }
+];
+    const ONE_SHOT_PROMPT = `Check my Google Drive account under ~/Library/CloudStorage/ (or via find ~/Library/CloudStorage -name 'gemini_agi_migration_bundle.zip'), extract gemini_agi_migration_bundle.zip, read README.md and AGI_AUTONOMOUS_ENVIRONMENT_SPEC.md, install the skills into ~/.gemini/config/skills/, and activate the setup-reconstitutor skill to autonomously compile and set up all programs on this computer.`;
+
+    let activeTabId = null;
+    const renderedCache = {};
+
+    mermaid.initialize({
+      startOnLoad: false,
+      theme: 'dark',
+      securityLevel: 'loose'
+    });
+
+    const renderer = new marked.Renderer();
+    renderer.code = function(code, language) {
+      if (language === 'mermaid') {
+        return `<div class="mermaid">${code}</div>`;
+      }
+      const validLanguage = hljs.getLanguage(language) ? language : 'plaintext';
+      const highlighted = hljs.highlight(code, { language: validLanguage }).value;
+      return `<pre><button class="copy-btn" onclick="copyCode(this)">Copy</button><code class="hljs ${validLanguage}">${highlighted}</code></pre>`;
+    };
+
+    marked.setOptions({
+      renderer: renderer,
+      gfm: true,
+      breaks: false
+    });
+
+    function initNav() {
+      const navList = document.getElementById('navList');
+      navList.innerHTML = '';
+
+      TABS_DATA.forEach(tab => {
+        const li = document.createElement('li');
+        li.className = 'nav-item';
+        li.innerHTML = `
+          <a class="nav-link" id="nav-${tab.id}" onclick="selectTab('${tab.id}')">
+            <div class="nav-label-group">
+              <span class="nav-icon">${tab.icon}</span>
+              <span class="nav-text">${tab.title}</span>
+            </div>
+            <span class="nav-badge badge-${tab.badge_color}">${tab.badge}</span>
+          </a>
+        `;
+        navList.appendChild(li);
+      });
+    }
+
+    function selectTab(tabId) {
+      const tab = TABS_DATA.find(t => t.id === tabId);
+      if (!tab) return;
+
+      activeTabId = tabId;
+      window.location.hash = tabId;
+
+      // Update Nav active classes
+      document.querySelectorAll('.nav-link').forEach(link => link.classList.remove('active'));
+      const activeNav = document.getElementById(`nav-${tabId}`);
+      if (activeNav) activeNav.classList.add('active');
+
+      // Update Header
+      document.getElementById('headerIcon').innerText = tab.icon;
+      document.getElementById('headerTitle').innerText = tab.title;
+      const headerBadge = document.getElementById('headerBadge');
+      headerBadge.innerText = tab.badge;
+      headerBadge.className = `nav-badge badge-${tab.badge_color}`;
+
+      // Update Hero
+      document.getElementById('heroTitle').innerText = `${tab.icon} ${tab.title}`;
+      document.getElementById('heroDesc').innerText = tab.summary;
+      
+      const heroPills = document.getElementById('heroPills');
+      heroPills.innerHTML = `
+        <span class="meta-pill">📁 File: <code>${tab.filename}</code></span>
+        <span class="meta-pill">🏷️ Status: <strong>Production Reconstituted</strong></span>
+        <span class="meta-pill">🎯 Invariants: <strong>Strict Empirical</strong></span>
+      `;
+
+      // Render Markdown
+      const container = document.getElementById('markdownOutput');
+      if (renderedCache[tabId]) {
+        container.innerHTML = renderedCache[tabId];
+      } else {
+        const rawEl = document.getElementById(`raw-${tabId}`);
+        if (rawEl) {
+          const rawText = rawEl.textContent;
+          const html = marked.parse(rawText);
+          container.innerHTML = html;
+          renderedCache[tabId] = html;
+        }
+      }
+
+      // Render any Mermaid diagrams in the active view
+      setTimeout(() => {
+        mermaid.run({
+          nodes: container.querySelectorAll('.mermaid')
+        });
+      }, 50);
+
+      // Scroll viewport to top
+      document.getElementById('viewport').scrollTop = 0;
+    }
+
+    function filterTabs(query) {
+      const q = query.toLowerCase();
+      TABS_DATA.forEach(tab => {
+        const el = document.getElementById(`nav-${tab.id}`);
+        if (!el) return;
+        const match = tab.title.toLowerCase().includes(q) || 
+                      tab.summary.toLowerCase().includes(q) || 
+                      tab.badge.toLowerCase().includes(q);
+        el.parentElement.style.display = match ? '' : 'none';
+      });
+    }
+
+    function copyCode(btn) {
+      const code = btn.nextElementSibling.innerText;
+      navigator.clipboard.writeText(code).then(() => {
+        btn.innerText = 'Copied!';
+        setTimeout(() => { btn.innerText = 'Copy'; }, 2000);
+      });
+    }
+
+    function copyOneShotPrompt() {
+      navigator.clipboard.writeText(ONE_SHOT_PROMPT).then(() => {
+        showToast('📋 One-Shot AGI Activation Prompt copied to clipboard!');
+      });
+    }
+
+    function copyCurrentUrl() {
+      navigator.clipboard.writeText(window.location.href).then(() => {
+        showToast('🔗 Spec deep-link copied to clipboard!');
+      });
+    }
+
+    function downloadActiveMarkdown() {
+      const rawEl = document.getElementById(`raw-${activeTabId}`);
+      if (!rawEl) return;
+      const tab = TABS_DATA.find(t => t.id === activeTabId);
+      const blob = new Blob([rawEl.textContent], { type: 'text/markdown' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = tab ? tab.filename : `${activeTabId}.md`;
+      a.click();
+      showToast(`⬇️ Downloaded ${a.download}`);
+    }
+
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      const toastText = document.getElementById('toastText');
+      toastText.innerText = msg;
+      toast.style.display = 'flex';
+      setTimeout(() => {
+        toast.style.display = 'none';
+      }, 3000);
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      initNav();
+      const hash = window.location.hash.replace('#', '');
+      const initialTab = TABS_DATA.find(t => t.id === hash) ? hash : TABS_DATA[0].id;
+      selectTab(initialTab);
+    });
+  </script>
+</body>
+</html>

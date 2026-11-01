@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>System Resource Analytics — Memory Reclaimed</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      background: #0f172a;
+      color: #f8fafc;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+    .glass-card {
+      background: rgba(30, 41, 59, 0.7);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 1rem;
+    }
+    .progress-bar-segment {
+      transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+  </style>
+</head>
+<body class="min-h-screen p-6 md:p-10 flex flex-col items-center">
+
+  <div class="max-w-6xl w-full space-y-8">
+    
+    <!-- Header -->
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-6 border-b border-slate-800">
+      <div>
+        <div class="flex items-center gap-3">
+          <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+            Updated • Memory Reclaimed
+          </span>
+          <span class="text-xs text-slate-400 font-mono">Apple Silicon M5 (10 Cores)</span>
+        </div>
+        <h1 class="text-2xl md:text-3xl font-bold tracking-tight text-white mt-1">Host Analytics: llama-server Terminated</h1>
+        <p class="text-slate-400 text-sm mt-0.5">Physical Memory: 16 GB Unified • Wired Memory Dropped from 6.9 GB to 2.2 GB</p>
+      </div>
+      
+      <div class="flex items-center gap-3">
+        <div class="px-4 py-2 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 flex items-center gap-2.5 text-sm">
+          <svg class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+          </svg>
+          <div>
+            <div class="text-[11px] font-medium text-emerald-400/80 uppercase tracking-wider">Freed RAM</div>
+            <div class="font-bold">+4.7 GB Reclaimed</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quick Stat Cards -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div class="glass-card p-5">
+        <div class="flex justify-between items-start">
+          <div class="text-xs font-medium text-slate-400 uppercase tracking-wider">Physical Memory</div>
+          <span class="p-1.5 rounded-lg bg-blue-500/10 text-blue-400">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+          </span>
+        </div>
+        <div class="text-2xl font-bold text-white mt-2">16.0 GB</div>
+        <div class="text-xs text-emerald-400 mt-1">~10.5 GB now available for AI models</div>
+      </div>
+
+      <div class="glass-card p-5 border-emerald-500/30">
+        <div class="flex justify-between items-start">
+          <div class="text-xs font-medium text-emerald-400 uppercase tracking-wider">llama-server Status</div>
+          <span class="p-1.5 rounded-lg bg-emerald-500/10 text-emerald-400">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+          </span>
+        </div>
+        <div class="text-2xl font-bold text-emerald-300 mt-2">Killed / Unloaded</div>
+        <div class="text-xs text-slate-400 mt-1">Zero active connections detected</div>
+      </div>
+
+      <div class="glass-card p-5">
+        <div class="flex justify-between items-start">
+          <div class="text-xs font-medium text-slate-400 uppercase tracking-wider">Wired System Memory</div>
+          <span class="p-1.5 rounded-lg bg-indigo-500/10 text-indigo-400">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+          </span>
+        </div>
+        <div class="text-2xl font-bold text-indigo-300 mt-2">2.23 GB</div>
+        <div class="text-xs text-slate-400 mt-1">Dropped from 6.93 GB (mlock released)</div>
+      </div>
+
+      <div class="glass-card p-5">
+        <div class="flex justify-between items-start">
+          <div class="text-xs font-medium text-slate-400 uppercase tracking-wider">CPU Load (10-Core)</div>
+          <span class="p-1.5 rounded-lg bg-emerald-500/10 text-emerald-400">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+          </span>
+        </div>
+        <div class="text-2xl font-bold text-emerald-300 mt-2">2.14 <span class="text-sm font-normal text-slate-400">/ 10.0</span></div>
+        <div class="text-xs text-emerald-400 mt-1">Normal & Healthy</div>
+      </div>
+    </div>
+
+    <!-- Memory Distribution Visualizer -->
+    <div class="glass-card p-6 space-y-4">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+        <h2 class="text-lg font-bold text-white flex items-center gap-2">
+          <span>New Unified RAM Allocation</span>
+          <span class="text-xs font-normal text-slate-400 font-mono">(16,384 MB Total)</span>
+        </h2>
+        <div class="text-xs text-emerald-400 font-semibold">Post-Termination State</div>
+      </div>
+
+      <!-- Segmented Bar -->
+      <div class="w-full h-8 bg-slate-800 rounded-xl overflow-hidden flex p-1 gap-1">
+        <!-- 29x agy (2.37GB = ~14.8%) -->
+        <div class="h-full bg-amber-500 rounded-lg flex items-center justify-center text-[10px] font-bold text-slate-900 overflow-hidden progress-bar-segment" style="width: 14.8%;" title="29x agy processes: 2,426 MB">
+          29x agy (15%)
+        </div>
+        <!-- Chrome & Renderers (1.25GB = ~7.8%) -->
+        <div class="h-full bg-indigo-500 rounded-lg flex items-center justify-center text-[10px] font-bold text-white overflow-hidden progress-bar-segment" style="width: 7.8%;" title="Chrome: 1,250 MB">
+          Chrome (8%)
+        </div>
+        <!-- macOS Wired (2.23GB = ~13.9%) -->
+        <div class="h-full bg-sky-600 rounded-lg flex items-center justify-center text-[10px] font-bold text-white overflow-hidden progress-bar-segment" style="width: 13.9%;" title="macOS System Wired: ~2,230 MB">
+          macOS Wired (14%)
+        </div>
+        <!-- Available / Inactive Buffer (10.4GB = ~63.5%) -->
+        <div class="h-full bg-emerald-500/50 border border-emerald-500/60 rounded-lg flex items-center justify-center text-[10px] font-bold text-emerald-200 overflow-hidden progress-bar-segment" style="width: 63.5%;" title="Available Headroom: ~10,400 MB">
+          Free / Usable Headroom (~64%)
+        </div>
+      </div>
+
+      <!-- Legend -->
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-2 text-xs">
+        <div class="flex items-center gap-2">
+          <span class="w-3 h-3 rounded bg-amber-500"></span>
+          <span class="text-slate-300">29x agy CLI: <strong>2.37 GB</strong></span>
+        </div>
+        <div class="flex items-center gap-2">
+          <span class="w-3 h-3 rounded bg-indigo-500"></span>
+          <span class="text-slate-300">Chrome Tabs: <strong>1.25 GB</strong></span>
+        </div>
+        <div class="flex items-center gap-2">
+          <span class="w-3 h-3 rounded bg-sky-600"></span>
+          <span class="text-slate-300">macOS Wired: <strong>2.23 GB</strong></span>
+        </div>
+        <div class="flex items-center gap-2">
+          <span class="w-3 h-3 rounded bg-emerald-500/50 border border-emerald-500/60"></span>
+          <span class="text-slate-300">Available Headroom: <strong>~10.40 GB</strong></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Notification Banner -->
+    <div class="glass-card p-6 bg-gradient-to-r from-emerald-950/40 to-slate-900 border-emerald-500/30">
+      <h3 class="text-base font-bold text-white flex items-center gap-2">
+        <svg class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+        Action Completed Successfully
+      </h3>
+      <div class="mt-3 text-xs text-slate-300 space-y-2 leading-relaxed">
+        <p>1. We inspected active socket connections on port <code>63645</code> and port <code>11434</code>. <strong>Zero established connections</strong> were found (the model was completely idle).</p>
+        <p>2. We terminated <code>llama-server</code> and unloaded the model from both LM Studio and Ollama.</p>
+        <p>3. <strong>Result:</strong> Wired memory dropped from <strong>6.93 GB to 2.23 GB</strong>, immediately restoring <strong>~4.7 GB of physical RAM</strong> to your system.</p>
+      </div>
+    </div>
+
+  </div>
+
+</body>
+</html>

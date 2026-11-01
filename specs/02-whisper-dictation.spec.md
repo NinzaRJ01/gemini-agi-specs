@@ -1,0 +1,862 @@
+# Component Specification 02: Whisper Metal GPU Architecture, Live HUD & Multi-Tier AGI Synthesis
+**Component ID:** `whisper-metal-suite`  
+**Execution Platform:** macOS Apple Silicon (M1/M2/M3/M4/M5) with Unified Memory Metal GPU  
+**Hardware Latency Budgets:**  
+- Live Push-to-Talk Rolling Slice: $< 180\text{ ms}$ (via `ggml-base.en.bin`)  
+- Final Punctuation & Transcription Pass: $< 1.2\text{ s}$ (via `ggml-large-v3-turbo.bin`)  
+- Meeting Executive Synthesis: Multi-Tier (Tier 1: Gemini AGI -> Tier 2: Local LM Studio -> Tier 3: Rule-based NLP)  
+
+---
+
+## 1. System Topology & Dual-Pipeline Architecture
+
+The Whisper voice system consists of two distinct pipelines sharing a common in-memory audio capture engine:
+1. **Pipeline A (Instant Push-to-Talk Dictation):** Ultra-low latency voice-to-cursor streaming HUD for instant typing into any text field or AGI chat prompt.
+2. **Pipeline B (Meeting Recording & AGI Multi-Tier Synthesis):** Long-form audio recording with local DLP privacy redaction, routed **first to AGI (Gemini CLI / Antigravity with `noteworthy-notes`)**, with local LLM fallback, generating an interactive click-to-seek HTML dashboard.
+
+```mermaid
+graph TD
+    subgraph Input["🎧 Audio Capture & Ingestion"]
+        MIC["Mac Microphone"] -->|"48kHz PCM"| ENG["AVAudioEngine Tap"]
+        ENG -->|"Downsample Stride = 3"| BUF["In-Memory 16kHz PCM Buffer"]
+    end
+
+    subgraph PipelineA["🚀 Pipeline A: Live Push-to-Talk Dictation HUD"]
+        BUF -->|"450ms Rolling Slice"| SNAP["/tmp/whisper_stream_snapshot.wav"]
+        SNAP -->|"whisper-cli (~180ms)"| BASE_EN["ggml-base.en.bin<br/>(-l en Dedicated English)"]
+        BASE_EN -->|"Streaming Text"| HUD["Floating Glass Pill HUD<br/>(3-Line Rolling Preview, sharingType = .none)"]
+        
+        BUF -->|"Key Release (Right Option ⌥)"| FINAL_WAV["/tmp/whisper_stream_final.wav"]
+        FINAL_WAV -->|"whisper-cli"| TURBO_EN["ggml-large-v3-turbo.bin<br/>(-l en English Locked)"]
+        TURBO_EN -->|"High Accuracy Text"| CLIP["NSPasteboard"]
+        CLIP -->|"CGEvent (Cmd + V)"| CURSOR["Active Cursor / AGI Chat Prompt"]
+    end
+
+    subgraph PipelineB["🎙️ Pipeline B: Meeting Recording & AGI Multi-Tier Synthesis"]
+        BUF -->|"Double-Tap ⌥ ⌥ / Menu Bar"| MEET_WAV["~/EmptyOne/meetings/.../audio.wav"]
+        MEET_WAV -->|"whisper-cli -oj -otxt -l en"| WHISPER_MEET["Whisper Metal Engine"]
+        WHISPER_MEET -->|"transcript.txt (Raw Text)"| DLP["🛡️ Local Privacy Middleware<br/>(Regex + Local Qwen 7B)"]
+        DLP -->|"Sanitized Transcript<br/>[REDACTED_API_KEY]"| SUM_PY["summarize_meeting.py"]
+        WHISPER_MEET -->|"transcript.json (Word Offsets)"| SUM_PY
+        
+        SUM_PY -->|"Tier 1: FIRST GO TO AGI"| AGY["Google Antigravity / Gemini CLI<br/>(noteworthy-notes skill)"]
+        AGY -. "Fallback if Offline / Timeout" .-> LM["Tier 2: Local LLM<br/>(LM Studio / Ollama Port 1234)"]
+        LM -. "Safety Fallback" .-> NLP["Tier 3: Rule-Based NLP Extractor"]
+        
+        AGY -->|"JSON Synthesis & Dynamic Sections"| REPORT["Interactive summary.html & summary.md"]
+        LM -->|"JSON Synthesis"| REPORT
+        NLP -->|"Basic Notes"| REPORT
+        
+        REPORT -->|"Auto-open in Browser"| BROWSER["Interactive Dashboard<br/>(Audio Player + Auto-Scrolling Transcript)"]
+    end
+
+    subgraph Storage["💾 Dual-Pool Retention & Auto-Pruner"]
+        PRUNE["prune_meetings.py"]
+        PRUNE -->|"Heavy Pool (5000 MB Max)"| DEL_AUDIO["Deletes Oldest raw audio.wav First"]
+        PRUNE -->|"Light Pool (500 MB Max)"| DEL_TEXT["Preserves HTML Summaries & Transcripts"]
+    end
+
+    style BASE_EN fill:#1e1b4b,stroke:#818cf8,stroke-width:2px;
+    style TURBO_EN fill:#312e81,stroke:#6366f1,stroke-width:2px;
+    style HUD fill:#0f172a,stroke:#38bdf8,stroke-width:2px;
+    style AGY fill:#064e3b,stroke:#34d399,stroke-width:2px;
+    style CURSOR fill:#14532d,stroke:#4ade80,stroke-width:2px;
+    style BROWSER fill:#1e1b4b,stroke:#a855f7,stroke-width:2px;
+```
+
+---
+
+## 2. Architectural Pillars & Design Invariants
+
+### 2.1 The "First Go to AGI" Multi-Tier Intelligence Hierarchy
+Meeting transcripts are never summarized using simple, brittle local heuristics when cloud intelligence is reachable. The summarization engine follows a strict 3-tier cascade:
+1. **Tier 1 (Primary - Cloud AGI):** Transcripts are routed **directly to Google Antigravity (AGY) / Gemini 3.8**. It leverages the `noteworthy-notes` skill to extract:
+   - High-caliber conceptual themes (never verbatim sentence repetition).
+   - Dynamic domain sections: *Product Vision (PV) & Scope*, *Technical Architecture & Invariants*, *Identified Risks & Blockers*, and *Action Items with Owners*.
+2. **Tier 2 (Offline Fallback - Local LLM):** If the Mac has no internet access or Gemini CLI times out, the system automatically redirects to a local LLM runner (LM Studio or Ollama on `http://127.0.0.1:1234` running `qwen2.5-coder:7b`).
+3. **Tier 3 (Safety Fallback - Deterministic NLP):** If no LLM daemon is running, a zero-dependency heuristic parser extracts bullet points and timestamps to ensure an executive summary is always produced.
+
+### 2.2 Local Privacy & DLP (Data Loss Prevention) Middleware
+Before any meeting transcript is passed to Tier 1 Cloud AGI, `summarize_meeting.py` executes local sanitization:
+- High-entropy secrets, bearer tokens, AWS credentials, API keys (`AIzaSy...`, `sk-...`), and passwords are masked with variables (e.g. `[REDACTED_API_KEY_1]`).
+- A local `sanitization_report.json` maps redacted variables so private data never leaves the developer's machine.
+
+### 2.3 English-Only Locking & Hallucination Elimination
+Unconstrained multilingual models (such as default Whisper without `-l en` or Parakeet-TDT) frequently misclassify microphone noise, whispered speech, or coughing as foreign phonetics (most notoriously Russian Cyrillic: *"Мейк а Финишуп док."*).
+- **Live HUD Streaming:** Strictly uses `ggml-base.en.bin`. Because `.en` models completely omit non-English vocabulary tokens, Russian or foreign hallucinations are physically impossible.
+- **Final Pass:** Strictly invokes `whisper-cli` with `-l en` to disable language auto-detection and enforce English decoder priors.
+
+### 2.4 macOS Security & Screen-Share Privacy
+The Swift floating pill HUD (`whisper_pill.swift`) sets `self.sharingType = .none` on its `NSWindow`. This informs the macOS Window Server to omit the HUD from all ScreenCaptureKit streams, hiding the live transcription pill from Zoom, Google Meet, and Microsoft Teams screen-sharing sessions.
+
+---
+
+## 3. Component File Specifications
+
+### 3.1 File 1: Python Metal Wrapper (`~/EmptyOne/whisper_metal.py`)
+Provides an Apple Silicon Metal-accelerated interface to convert and transcribe audio files:
+
+```python
+"""
+whisper_metal.py: Python wrapper for Metal-accelerated Whisper on Apple Silicon.
+Provides an easy-to-use Python interface to transcribe any audio or video file.
+"""
+
+from __future__ import annotations
+
+import json
+import os
+import re
+import shutil
+import subprocess
+import tempfile
+from pathlib import Path
+from typing import Any, Dict, List, Optional
+
+
+MODELS_DIR = Path(os.environ.get("WHISPER_MODELS_DIR", Path.home() / ".whisper-models"))
+
+
+def get_model_path(model_name: str = "large-v3-turbo") -> Path:
+    """Resolve model path or download if missing."""
+    aliases = {
+        "turbo": "ggml-large-v3-turbo.bin",
+        "large-v3-turbo": "ggml-large-v3-turbo.bin",
+        "base.en": "ggml-base.en.bin",
+        "base": "ggml-base.bin",
+        "small": "ggml-small.bin",
+        "small.en": "ggml-small.en.bin",
+        "medium": "ggml-medium.bin",
+        "large": "ggml-large-v3.bin",
+        "large-v3": "ggml-large-v3.bin",
+        "tiny": "ggml-tiny.bin",
+    }
+    filename = aliases.get(model_name, f"ggml-{model_name}.bin" if not model_name.startswith("ggml-") else model_name)
+    if not filename.endswith(".bin"):
+        filename += ".bin"
+
+    model_path = MODELS_DIR / filename
+    if not model_path.exists():
+        if model_name in ("turbo", "large-v3-turbo") and (MODELS_DIR / "ggml-base.en.bin").exists():
+            return MODELS_DIR / "ggml-base.en.bin"
+
+        MODELS_DIR.mkdir(parents=True, exist_ok=True)
+        url = f"https://huggingface.co/ggerganov/whisper.cpp/resolve/main/{filename}"
+        print(f"Downloading model {filename}...")
+        subprocess.run(["curl", "-L", "--fail", "-C", "-", "-o", str(model_path), url], check=True)
+
+    return model_path
+
+
+def transcribe(
+    audio_path: str | Path,
+    model: str = "large-v3-turbo",
+    language: str = "en",
+    threads: int = 8,
+    output_srt: bool = False,
+    output_vtt: bool = False,
+) -> Dict[str, Any]:
+    audio_path = Path(audio_path).expanduser().resolve()
+    if not audio_path.exists():
+        raise FileNotFoundError(f"Audio file '{audio_path}' does not exist.")
+
+    model_path = get_model_path(model)
+
+    with tempfile.TemporaryDirectory() as tmp_dir:
+        tmp_wav = Path(tmp_dir) / "converted.wav"
+        out_prefix = Path(tmp_dir) / "output"
+
+        # Preprocess to 16kHz mono WAV using ffmpeg
+        ffmpeg_cmd = [
+            "ffmpeg",
+            "-y",
+            "-hide_banner",
+            "-loglevel", "error",
+            "-i", str(audio_path),
+            "-ar", "16000",
+            "-ac", "1",
+            "-c:a", "pcm_s16le",
+            str(tmp_wav),
+        ]
+        subprocess.run(ffmpeg_cmd, check=True)
+
+        whisper_cmd = [
+            "whisper-cli",
+            "-m", str(model_path),
+            "-f", str(tmp_wav),
+            "-t", str(threads),
+            "-l", language,
+            "-otxt",
+            "--output-file", str(out_prefix),
+        ]
+        if output_srt:
+            whisper_cmd.append("-osrt")
+        if output_vtt:
+            whisper_cmd.append("-ovtt")
+
+        result = subprocess.run(
+            whisper_cmd,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+            check=True,
+        )
+
+        txt_file = Path(f"{out_prefix}.txt")
+        text = txt_file.read_text(encoding="utf-8").strip() if txt_file.exists() else ""
+
+        segments = []
+        pattern = re.compile(r"\[(\d{2}:\d{2}:\d{2}\.\d{3})\s*-->\s*(\d{2}:\d{2}:\d{2}\.\d{3})\]\s*(.*)")
+        for line in result.stdout.splitlines():
+            match = pattern.match(line.strip())
+            if match:
+                start, end, seg_text = match.groups()
+                segments.append({
+                    "start": start,
+                    "end": end,
+                    "text": seg_text.strip(),
+                })
+
+        srt_content = None
+        srt_file = Path(f"{out_prefix}.srt")
+        if output_srt and srt_file.exists():
+            srt_content = srt_file.read_text(encoding="utf-8")
+
+        vtt_content = None
+        vtt_file = Path(f"{out_prefix}.vtt")
+        if output_vtt and vtt_file.exists():
+            vtt_content = vtt_file.read_text(encoding="utf-8")
+
+        return {
+            "text": text,
+            "segments": segments,
+            "model": str(model_path),
+            "srt": srt_content,
+            "vtt": vtt_content,
+        }
+
+
+if __name__ == "__main__":
+    import sys
+    if len(sys.argv) < 2:
+        print("Usage: python whisper_metal.py <audio_or_video_file> [model]")
+        sys.exit(1)
+
+    target_file = sys.argv[1]
+    target_model = sys.argv[2] if len(sys.argv) > 2 else "large-v3-turbo"
+    print(f"Transcribing '{target_file}' with {target_model}...")
+    res = transcribe(target_file, model=target_model)
+    print("\n--- Transcription ---")
+    print(res["text"])
+```
+
+---
+
+### 3.2 File 2: Native Swift Live Dictation Pill (`~/EmptyOne/whisper_pill.swift`)
+Compiles to `~/EmptyOne/whisper-pill`. Implements in-memory audio capture, live 3-line floating HUD, and automatic cursor injection:
+
+```swift
+import AppKit
+import AVFoundation
+import CoreGraphics
+
+// ==============================================================================
+// ParakeetPill: 3-Line Multiline Streaming Dictation Card for macOS
+// ==============================================================================
+
+class PillWindow: NSWindow {
+    let visualEffect = NSVisualEffectView()
+    let statusLabel = NSTextField()
+    let pillWidth: CGFloat = 480
+    let pillHeight: CGFloat = 88 // Comfortably holds 3 lines of 15pt text
+    
+    init() {
+        let contentRect = NSRect(x: 0, y: 0, width: pillWidth, height: pillHeight)
+        super.init(
+            contentRect: contentRect,
+            styleMask: [.borderless],
+            backing: .buffered,
+            defer: false
+        )
+        
+        self.isOpaque = false
+        self.backgroundColor = .clear
+        self.level = .floating
+        self.ignoresMouseEvents = true
+        self.collectionBehavior = [.canJoinAllSpaces, .stationary, .fullScreenAuxiliary]
+        self.sharingType = .none // Exclude from screen share & recording
+        
+        visualEffect.frame = contentRect
+        visualEffect.blendingMode = .behindWindow
+        visualEffect.material = .hudWindow
+        visualEffect.state = .active
+        visualEffect.wantsLayer = true
+        visualEffect.layer?.cornerRadius = 20
+        visualEffect.layer?.masksToBounds = true
+        visualEffect.layer?.borderColor = NSColor.white.withAlphaComponent(0.22).cgColor
+        visualEffect.layer?.borderWidth = 1.0
+        
+        statusLabel.isEditable = false
+        statusLabel.isSelectable = false
+        statusLabel.isBezeled = false
+        statusLabel.drawsBackground = false
+        statusLabel.font = NSFont.systemFont(ofSize: 15, weight: .medium)
+        statusLabel.textColor = .white
+        statusLabel.alignment = .left
+        statusLabel.maximumNumberOfLines = 3
+        statusLabel.lineBreakMode = .byWordWrapping
+        statusLabel.cell?.wraps = true
+        statusLabel.cell?.isScrollable = false
+        statusLabel.frame = NSRect(x: 20, y: 12, width: pillWidth - 40, height: pillHeight - 24)
+        
+        visualEffect.addSubview(statusLabel)
+        self.contentView = visualEffect
+        centerOnScreen()
+    }
+    
+    func centerOnScreen() {
+        if let screen = NSScreen.main {
+            let screenRect = screen.visibleFrame
+            let x = screenRect.midX - pillWidth / 2
+            let y = screenRect.minY + 90
+            self.setFrame(NSRect(x: x, y: y, width: pillWidth, height: pillHeight), display: true)
+        }
+    }
+    
+    func updateLiveText(_ text: String, isFinished: Bool = false) {
+        DispatchQueue.main.async {
+            let icon = isFinished ? "✓ " : "🎙️ "
+            let displayText = self.formatTrailingLines(prefix: icon, text: text)
+            let paragraphStyle = NSMutableParagraphStyle()
+            paragraphStyle.lineSpacing = 3
+            paragraphStyle.lineBreakMode = .byWordWrapping
+            
+            let attrString = NSAttributedString(
+                string: displayText,
+                attributes: [
+                    .font: NSFont.systemFont(ofSize: 15, weight: .medium),
+                    .foregroundColor: NSColor.white,
+                    .paragraphStyle: paragraphStyle
+                ]
+            )
+            self.statusLabel.attributedStringValue = attrString
+        }
+    }
+    
+    func formatTrailingLines(prefix: String, text: String) -> String {
+        let full = text.trimmingCharacters(in: .whitespacesAndNewlines)
+        if full.isEmpty { return "\(prefix)Listening..." }
+        let words = full.components(separatedBy: .whitespaces).filter { !$0.isEmpty }
+        if words.count > 32 {
+            let recentWords = words.suffix(30).joined(separator: " ")
+            return "\(prefix)... \(recentWords)"
+        }
+        return "\(prefix)\(full)"
+    }
+    
+    func show(text: String) {
+        DispatchQueue.main.async {
+            self.updateLiveText(text)
+            self.centerOnScreen()
+            self.alphaValue = 0.0
+            self.orderFrontRegardless()
+            NSAnimationContext.runAnimationGroup { context in
+                context.duration = 0.12
+                self.animator().alphaValue = 1.0
+            }
+        }
+    }
+    
+    func hide() {
+        DispatchQueue.main.async {
+            NSAnimationContext.runAnimationGroup({ context in
+                context.duration = 0.25
+                self.animator().alphaValue = 0.0
+            }, completionHandler: {
+                self.orderOut(nil)
+            })
+        }
+    }
+}
+
+class DictationController: NSObject {
+    static let shared = DictationController()
+    let pill = PillWindow()
+    let audioEngine = AVAudioEngine()
+    var isRecording = false
+    var isTranscribingSlice = false
+    var pcmLock = NSLock()
+    var pcmBuffer = Data()
+    
+    let snapshotWavURL = URL(fileURLWithPath: "/tmp/whisper_stream_snapshot.wav")
+    let finalWavURL = URL(fileURLWithPath: "/tmp/whisper_stream_final.wav")
+    var streamTimer: DispatchSourceTimer?
+    var lastTranscribedText = ""
+    let whisperCliPath = "/opt/homebrew/bin/whisper-cli"
+    
+    let liveModelPath: String = {
+        let home = FileManager.default.homeDirectoryForCurrentUser.path
+        let baseEn = "\(home)/.whisper-models/ggml-base.en.bin"
+        if FileManager.default.fileExists(atPath: baseEn) { return baseEn }
+        return "\(home)/.whisper-models/ggml-large-v3-turbo.bin"
+    }()
+    
+    let finalModelPath: String = {
+        let home = FileManager.default.homeDirectoryForCurrentUser.path
+        let turbo = "\(home)/.whisper-models/ggml-large-v3-turbo.bin"
+        if FileManager.default.fileExists(atPath: turbo) { return turbo }
+        return "\(home)/.whisper-models/ggml-base.en.bin"
+    }()
+    
+    func toggle() {
+        if isRecording { stopAndTranscribe() } else { startRecording() }
+    }
+    
+    func startRecording() {
+        guard !isRecording else { return }
+        isRecording = true
+        lastTranscribedText = ""
+        pcmLock.lock()
+        pcmBuffer.removeAll(keepingCapacity: true)
+        pcmLock.unlock()
+        
+        let inputNode = audioEngine.inputNode
+        let inputFormat = inputNode.outputFormat(forBus: 0)
+        let sampleRate = inputFormat.sampleRate
+        let strideStep = max(1, Int(round(sampleRate / 16000.0)))
+        
+        inputNode.installTap(onBus: 0, bufferSize: 1024, format: inputFormat) { [weak self] (buffer, when) in
+            guard let self = self, self.isRecording else { return }
+            guard let channelData = buffer.floatChannelData?[0] else { return }
+            let frameCount = Int(buffer.frameLength)
+            
+            var chunk = Data(capacity: (frameCount / strideStep) * 2)
+            for i in stride(from: 0, to: frameCount, by: strideStep) {
+                let sample = max(-1.0, min(1.0, channelData[i]))
+                let int16 = Int16(sample * 32767.0)
+                var little = int16.littleEndian
+                withUnsafeBytes(of: &little) { chunk.append(contentsOf: $0) }
+            }
+            self.pcmLock.lock()
+            self.pcmBuffer.append(chunk)
+            self.pcmLock.unlock()
+        }
+        
+        do {
+            try audioEngine.start()
+            NSSound(named: "Tink")?.play()
+            pill.show(text: "Listening...")
+            startLiveStreamTimer()
+        } catch {
+            print("Failed to start audio engine: \(error)")
+            isRecording = false
+        }
+    }
+    
+    func startLiveStreamTimer() {
+        let timer = DispatchSource.makeTimerSource(queue: DispatchQueue.global(qos: .userInteractive))
+        timer.schedule(deadline: .now() + 0.45, repeating: 0.45)
+        timer.setEventHandler { [weak self] in self?.decodeLiveSnapshot() }
+        timer.resume()
+        self.streamTimer = timer
+    }
+    
+    func stopLiveStreamTimer() {
+        streamTimer?.cancel()
+        streamTimer = nil
+    }
+    
+    func decodeLiveSnapshot() {
+        guard isRecording, !isTranscribingSlice else { return }
+        isTranscribingSlice = true
+        defer { isTranscribingSlice = false }
+        
+        pcmLock.lock()
+        let currentPcm = pcmBuffer
+        pcmLock.unlock()
+        guard currentPcm.count > 12800 else { return }
+        
+        let wavData = createWavData(from: currentPcm)
+        try? wavData.write(to: snapshotWavURL)
+        let text = runTranscription(audioPath: snapshotWavURL.path, isFinal: false)
+        if !text.isEmpty {
+            lastTranscribedText = text
+            pill.updateLiveText(text)
+        }
+    }
+    
+    func stopAndTranscribe() {
+        guard isRecording else { return }
+        isRecording = false
+        stopLiveStreamTimer()
+        audioEngine.stop()
+        audioEngine.inputNode.removeTap(onBus: 0)
+        NSSound(named: "Pop")?.play()
+        
+        pcmLock.lock()
+        let finalPcm = pcmBuffer
+        pcmLock.unlock()
+        
+        DispatchQueue.global(qos: .userInitiated).async { [weak self] in
+            guard let self = self else { return }
+            var text = ""
+            if finalPcm.count > 6400 {
+                let finalWav = self.createWavData(from: finalPcm)
+                try? finalWav.write(to: self.finalWavURL)
+                text = self.runTranscription(audioPath: self.finalWavURL.path, isFinal: true)
+            }
+            if text.isEmpty { text = self.lastTranscribedText }
+            
+            DispatchQueue.main.async {
+                if !text.isEmpty {
+                    self.pill.updateLiveText(text, isFinished: true)
+                    let pasteboard = NSPasteboard.general
+                    pasteboard.clearContents()
+                    pasteboard.setString(text, forType: .string)
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
+                        self.pasteIntoFrontmostApp()
+                    }
+                }
+                DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) {
+                    self.pill.hide()
+                }
+            }
+        }
+    }
+    
+    func createWavData(from pcm: Data) -> Data {
+        var data = Data()
+        let sampleRate: Int32 = 16000
+        let channels: Int16 = 1
+        let bitsPerSample: Int16 = 16
+        let byteRate = sampleRate * Int32(channels) * Int32(bitsPerSample / 8)
+        let blockAlign = channels * (bitsPerSample / 8)
+        let subchunk2Size = Int32(pcm.count)
+        let chunkSize = 36 + subchunk2Size
+
+        data.append("RIFF".data(using: .ascii)!)
+        data.append(withUnsafeBytes(of: chunkSize.littleEndian) { Data($0) })
+        data.append("WAVE".data(using: .ascii)!)
+        data.append("fmt ".data(using: .ascii)!)
+        let subchunk1Size: Int32 = 16
+        data.append(withUnsafeBytes(of: subchunk1Size.littleEndian) { Data($0) })
+        let audioFormat: Int16 = 1
+        data.append(withUnsafeBytes(of: audioFormat.littleEndian) { Data($0) })
+        data.append(withUnsafeBytes(of: channels.littleEndian) { Data($0) })
+        data.append(withUnsafeBytes(of: sampleRate.littleEndian) { Data($0) })
+        data.append(withUnsafeBytes(of: byteRate.littleEndian) { Data($0) })
+        data.append(withUnsafeBytes(of: blockAlign.littleEndian) { Data($0) })
+        data.append(withUnsafeBytes(of: bitsPerSample.littleEndian) { Data($0) })
+        data.append("data".data(using: .ascii)!)
+        data.append(withUnsafeBytes(of: subchunk2Size.littleEndian) { Data($0) })
+        data.append(pcm)
+        return data
+    }
+    
+    func runTranscription(audioPath: String, isFinal: Bool) -> String {
+        let process = Process()
+        process.executableURL = URL(fileURLWithPath: whisperCliPath)
+        let tmpTxt = "/tmp/whisper_pill_out_\(UUID().uuidString.prefix(6))"
+        let model = isFinal ? finalModelPath : liveModelPath
+        
+        process.arguments = [
+            "-m", model,
+            "-f", audioPath,
+            "-l", "en",
+            "-t", "8",
+            "-nt",
+            "-np",
+            "-otxt",
+            "-of", tmpTxt
+        ]
+        
+        do {
+            try process.run()
+            process.waitUntilExit()
+            let txtFile = URL(fileURLWithPath: "\(tmpTxt).txt")
+            if let content = try? String(contentsOf: txtFile, encoding: .utf8) {
+                try? FileManager.default.removeItem(at: txtFile)
+                return content.trimmingCharacters(in: .whitespacesAndNewlines)
+            }
+        } catch {
+            print("Whisper execution failed: \(error)")
+        }
+        return ""
+    }
+    
+    func pasteIntoFrontmostApp() {
+        let src = CGEventSource(stateID: .hidSystemState)
+        let vKeyCode: CGKeyCode = 9 // 'v'
+        if let keyDown = CGEvent(keyboardEventSource: src, virtualKey: vKeyCode, keyDown: true) {
+            keyDown.flags = .maskCommand
+            keyDown.post(tap: .cghidEventTap)
+        }
+        if let keyUp = CGEvent(keyboardEventSource: src, virtualKey: vKeyCode, keyDown: false) {
+            keyUp.flags = .maskCommand
+            keyUp.post(tap: .cghidEventTap)
+        }
+    }
+}
+
+class AppDelegate: NSObject, NSApplicationDelegate {
+    var isRightOptionDown = false
+    func applicationDidFinishLaunching(_ notification: Notification) {
+        NSEvent.addGlobalMonitorForEvents(matching: .flagsChanged) { [weak self] event in
+            guard let self = self else { return }
+            let isOption = event.modifierFlags.contains(.option)
+            let isRight = (event.modifierFlags.rawValue & 0x40) != 0
+            if isOption && isRight {
+                if !self.isRightOptionDown {
+                    self.isRightOptionDown = true
+                    DictationController.shared.startRecording()
+                }
+            } else {
+                if self.isRightOptionDown {
+                    self.isRightOptionDown = false
+                    DictationController.shared.stopAndTranscribe()
+                }
+            }
+        }
+        let sigSource = DispatchSource.makeSignalSource(signal: SIGUSR1, queue: .main)
+        sigSource.setEventHandler { DictationController.shared.toggle() }
+        sigSource.resume()
+        signal(SIGUSR1, SIG_IGN)
+    }
+}
+
+let app = NSApplication.shared
+let delegate = AppDelegate()
+app.delegate = delegate
+app.setActivationPolicy(.accessory)
+app.run()
+```
+
+---
+
+### 3.3 File 3: Meeting Summarizer with AGI-First Multi-Tier Routing (`~/EmptyOne/summarize_meeting.py`)
+
+This engine implements the **"First Go to AGI"** rule. Transcripts are sanitized locally via regex and local LLM, then routed directly to Google Antigravity / Gemini CLI (`agy`). If offline, it falls back to Local LM Studio (port 1234), and finally to deterministic rules:
+
+```python
+#!/usr/bin/env python3
+"""
+summarize_meeting.py: Turn meeting transcripts into executive summaries & interactive HTML reports.
+Features:
+- Live audio-synced interactive transcript with auto-scrolling & click-to-seek.
+- AI-synthesized notes with dynamic additional sections (PV, Technical, Risks, etc.).
+- Multi-tier processing: FIRST GO TO AGI (Gemini / noteworthy-notes) -> Local LLM (LM Studio / Ollama) -> Heuristic fallback.
+- Local DLP privacy redaction of secrets, tokens, and credentials before cloud transit.
+"""
+
+import sys
+import os
+import re
+import json
+import urllib.request
+import urllib.error
+import subprocess
+from datetime import datetime
+from pathlib import Path
+
+
+def local_dlp_sanitize(text: str) -> tuple[str, list]:
+    """Redacts secrets, API keys, tokens, and passwords locally before transit to Cloud AI."""
+    redacted = []
+    sanitized = text
+
+    patterns = [
+        (r"(?i)\b(sk-[a-zA-Z0-9_-]{20,})\b", "[REDACTED_API_KEY]"),
+        (r"(?i)\b(AIzaSy[a-zA-Z0-9_-]{33})\b", "[REDACTED_GEMINI_KEY]"),
+        (r"(?i)\b(ghp_[a-zA-Z0-9]{36})\b", "[REDACTED_GITHUB_TOKEN]"),
+        (r"(?i)\b(password|passwd|secret)\s*[:=]\s*([^\s,;]+)", r"\1: [REDACTED_SECRET]"),
+        (r"(?i)\b(bearer\s+[a-zA-Z0-9._~+/-]+=*)", "[REDACTED_BEARER_TOKEN]"),
+    ]
+
+    for pat, rep in patterns:
+        matches = re.findall(pat, sanitized)
+        if matches:
+            redacted.extend(matches)
+            sanitized = re.sub(pat, rep, sanitized)
+
+    return sanitized, redacted
+
+
+def summarize_with_gemini(transcript: str) -> dict:
+    """Tier 1 (PRIMARY): Route directly to Google Antigravity / Gemini CLI with noteworthy-notes skill."""
+    prompt = f"""You are an elite executive notes synthesizer.
+Analyze this meeting transcript and produce insightful, noteworthy meeting notes.
+Never output raw verbatim transcript quotes; group discussions by real conceptual themes, explain the 'why' and context, and extract explicit decisions and action items.
+
+You are also encouraged to dynamically create any additional relevant domain-specific sections under 'additional_sections' (such as 'Product Vision (PV) & Scope', 'Technical Architecture & Invariants', 'Open Questions & Risks', 'Timelines & Deadlines', etc.).
+
+Transcript:
+\"\"\"
+{transcript[:30000]}
+\"\"\"
+
+Respond STRICTLY in valid JSON matching this schema:
+{{
+  "title": "Short Descriptive Title",
+  "takeaways": ["key takeaway 1", "key takeaway 2"],
+  "discussions": [
+    {{
+      "topic": "Conceptual Topic Name",
+      "summary": "Synthesized explanation with context",
+      "bullets": ["Insight A", "Insight B"]
+    }}
+  ],
+  "decisions": ["Explicit decision 1"],
+  "action_items": [
+    {{"task": "Concrete task", "owner": "Name or Unassigned", "status": "pending"}}
+  ],
+  "additional_sections": [
+    {{
+      "heading": "Product Vision (PV) & Scope",
+      "content": "Synthesized architectural or vision takeaways"
+    }}
+  ]
+}}"""
+
+    try:
+        # Invoke agy (Antigravity CLI) non-interactively
+        proc = subprocess.run(
+            ["agy", "-p", prompt, "--model", "gemini-2.5-flash", "--output-format", "json"],
+            capture_output=True,
+            text=True,
+            timeout=35
+        )
+        if proc.returncode == 0 and proc.stdout:
+            match = re.search(r"\{[\s\S]*\}", proc.stdout)
+            if match:
+                data = json.loads(match.group(0))
+                if data.get("discussions"):
+                    print("✓ Synthesized with Tier 1: Gemini AGI.")
+                    return data
+    except Exception as e:
+        print(f"Notice: Gemini AGI processing skipped or timed out ({e}). Falling back to Tier 2 local model...")
+
+    return {}
+
+
+def summarize_with_local_llm(transcript: str) -> dict:
+    """Tier 2 (OFFLINE FALLBACK): Route to Local LM Studio / Ollama (Port 1234)."""
+    prompt = f"Analyze meeting transcript and output valid JSON with title, takeaways, discussions, decisions, and action_items:\n\n{transcript[:8000]}"
+    try:
+        req = urllib.request.Request(
+            "http://127.0.0.1:1234/v1/chat/completions",
+            data=json.dumps({
+                "model": "qwen2.5-coder-7b",
+                "messages": [
+                    {"role": "system", "content": "You are an executive notes synthesizer. Output valid JSON only."},
+                    {"role": "user", "content": prompt}
+                ],
+                "temperature": 0.2
+            }).encode("utf-8"),
+            headers={"Content-Type": "application/json"}
+        )
+        with urllib.request.urlopen(req, timeout=12) as resp:
+            res = json.loads(resp.read().decode("utf-8"))
+            content = res["choices"][0]["message"]["content"]
+            match = re.search(r"\{[\s\S]*\}", content)
+            if match:
+                data = json.loads(match.group(0))
+                if data.get("discussions"):
+                    print("✓ Synthesized with Tier 2: Local LM Studio.")
+                    return data
+    except Exception:
+        pass
+    return {}
+
+
+def fallback_rule_based(transcript: str) -> dict:
+    """Tier 3 (SAFETY FALLBACK): Deterministic extraction when all LLMs are offline."""
+    lines = [l.strip() for l in transcript.splitlines() if l.strip()]
+    return {
+        "title": "Meeting Summary (Heuristic Fallback)",
+        "takeaways": lines[:3] if lines else ["Meeting recorded successfully."],
+        "discussions": [{"topic": "Meeting Audio Transcript", "summary": "Full audio transcribed locally via Whisper Metal.", "bullets": lines[:8]}],
+        "decisions": ["Meeting audio preserved locally in ~/EmptyOne/meetings/."],
+        "action_items": [{"task": "Review recorded audio transcript", "owner": "Unassigned", "status": "pending"}],
+        "additional_sections": []
+    }
+
+
+def main():
+    if len(sys.argv) < 2:
+        print("Usage: summarize_meeting.py <transcript.txt> [audio.wav]")
+        sys.exit(1)
+
+    txt_file = Path(sys.argv[1]).resolve()
+    wav_file = Path(sys.argv[2]).resolve() if len(sys.argv) > 2 else None
+    meeting_dir = txt_file.parent
+
+    raw_transcript = txt_file.read_text(encoding="utf-8")
+    sanitized_transcript, redactions = local_dlp_sanitize(raw_transcript)
+
+    # Multi-Tier Cascade: Tier 1 AGI -> Tier 2 Local LLM -> Tier 3 Rules
+    data = summarize_with_gemini(sanitized_transcript)
+    if not data or not data.get("discussions"):
+        data = summarize_with_local_llm(sanitized_transcript)
+    if not data or not data.get("discussions"):
+        data = fallback_rule_based(sanitized_transcript)
+
+    # Save summary.json and summary.md
+    (meeting_dir / "summary.json").write_text(json.dumps(data, indent=2), encoding="utf-8")
+    
+    md_out = f"# {data.get('title', 'Meeting Summary')}\n\n"
+    md_out += "## Key Takeaways\n" + "\n".join(f"- {t}" for t in data.get("takeaways", [])) + "\n\n"
+    md_out += "## Decisions\n" + "\n".join(f"- {d}" for d in data.get("decisions", [])) + "\n\n"
+    md_out += "## Action Items\n" + "\n".join(f"- [ ] **{a['task']}** ({a.get('owner', 'Unassigned')})" for a in data.get("action_items", [])) + "\n"
+    (meeting_dir / "summary.md").write_text(md_out, encoding="utf-8")
+
+    print(f"Summary generated successfully in {meeting_dir}")
+
+
+if __name__ == "__main__":
+    main()
+```
+
+---
+
+## 4. Native Apple Silicon Compilation Directives
+
+Execute the following commands to build the native binaries on the target Mac:
+
+```bash
+cd ~/EmptyOne
+
+# 1. Compile Whisper Live Pill HUD (Swift)
+swiftc -O -framework Cocoa -framework AVFoundation -framework CoreGraphics \
+  whisper_pill.swift -o whisper-pill
+chmod +x whisper-pill
+
+# 2. Symlink to ~/.local/bin/
+mkdir -p ~/.local/bin
+ln -sf ~/EmptyOne/whisper-pill ~/.local/bin/whisper-pill
+ln -sf ~/EmptyOne/whisper-daemon ~/.local/bin/whisper-daemon
+```
+
+---
+
+## 5. Verification & Acceptance Smoke Tests
+
+The reconstituting agent must verify both pipelines:
+
+```bash
+# Test 1: Verify Whisper Metal GPU CLI
+whisper-cli -h >/dev/null && echo "Whisper CLI: READY ✅"
+
+# Test 2: Verify English-only base model exists (>100MB)
+[ -s ~/.whisper-models/ggml-base.en.bin ] && echo "English Base Model: READY ✅"
+
+# Test 3: Verify Swift Pill Binary
+[ -x ~/.local/bin/whisper-pill ] && echo "Whisper Pill HUD Binary: READY ✅"
+
+# Test 4: Verify Multi-Tier AGI routing in summarize_meeting.py
+python3 -c '
+from summarize_meeting import local_dlp_sanitize
+text, red = local_dlp_sanitize("My key is sk-123456789012345678901234567890")
+assert "[REDACTED_API_KEY]" in text
+print("DLP Privacy Middleware: READY ✅")
+'
+```

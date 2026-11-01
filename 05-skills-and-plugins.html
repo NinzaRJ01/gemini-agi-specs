@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>05. Skills & Plugins — Gemini AGI Specification</title>
+  
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/5.5.1/github-markdown-dark.min.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css" />
+  
+  <style>
+    :root {
+      --bg-page: #0d1117;
+      --bg-card: #161b22;
+      --border-color: #30363d;
+      --accent: #58a6ff;
+      --accent-purple: #bc8cff;
+      --accent-green: #3fb950;
+      --accent-orange: #d29922;
+      --text-main: #c9d1d9;
+      --text-bright: #f0f6fc;
+    }
+    body {
+      background-color: var(--bg-page);
+      color: var(--text-main);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      line-height: 1.6;
+    }
+    .top-banner {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(13, 17, 23, 0.90);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border-color);
+      padding: 14px 32px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-weight: 700;
+      font-size: 1.05rem;
+      color: var(--text-bright);
+    }
+    .badge {
+      display: inline-block;
+      padding: 3px 10px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      border-radius: 12px;
+      background: rgba(88, 166, 255, 0.15);
+      border: 1px solid rgba(88, 166, 255, 0.4);
+      color: var(--accent);
+    }
+    .actions {
+      display: flex;
+      gap: 10px;
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: #21262d;
+      color: var(--text-bright);
+      border: 1px solid var(--border-color);
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 0.82rem;
+      font-weight: 500;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.2s ease;
+    }
+    .btn:hover {
+      background: #30363d;
+      border-color: #8b949e;
+    }
+    .btn-portal {
+      background: #6e40c9;
+      border-color: #8957e5;
+      color: #fff;
+    }
+    .container {
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 32px 24px 80px 24px;
+    }
+    .markdown-body pre {
+      background-color: #161b22 !important;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 16px;
+      position: relative;
+    }
+    .copy-btn {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      background: #21262d;
+      color: #8b949e;
+      border: 1px solid var(--border-color);
+      border-radius: 4px;
+      font-size: 0.75rem;
+      padding: 3px 8px;
+      cursor: pointer;
+    }
+    .mermaid {
+      background: #161b22;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 20px;
+      margin: 20px 0;
+      display: flex;
+      justify-content: center;
+    }
+  </style>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/12.0.1/marked.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/swift.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/python.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/bash.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10.8.0/dist/mermaid.min.js"></script>
+</head>
+<body>
+  <div class="top-banner">
+    <div class="brand">
+      <span>🧠</span>
+      <span>05. Skills & Plugins</span>
+      <span class="badge">3-Tier Discovery</span>
+    </div>
+    <div class="actions">
+      <a href="ALL_SPECS.html#spec-05-skills-plugins" class="btn btn-portal">🗂️ View in Master Portal</a>
+      <button class="btn" onclick="copyPrompt()">📋 Copy One-Shot Prompt</button>
+    </div>
+  </div>
+
+  <div class="container">
+    <div id="content" class="markdown-body"></div>
+  </div>
+
+  <script type="text/markdown" id="raw-markdown">
+# Component Specification 05: Antigravity Customization Architecture, Plugins & Directives
+**Component ID:** `antigravity-customizations`  
+**Target Directories:**  
+- Global Host Skills: `~/.gemini/config/skills/`  
+- Autonomous Plugins: `~/.gemini/config/plugins/`  
+- Active Workspace Rules: `~/.gemini/config/plugins/*/rules/AGENTS.md`  
+
+---
+
+## 1. Antigravity Customization Architecture & Discovery Priority
+
+The Google Antigravity (AGY) agent runtime discovers and resolves skills, rules, and plugins through a strict 3-tier precedence hierarchy:
+
+```mermaid
+graph TD
+    subgraph DiscoveryHierarchy["Antigravity Discovery & Precedence Engine"]
+        L1["Tier 1: Project Repository (<repo>/.agents/skills/)<br/>Checked into VCS, shared with team, overrides host"]
+        L2["Tier 2: Global Host Environment (~/.gemini/config/skills/)<br/>Machine-wide developer tools, statusline, Whisper HUD"]
+        L3["Tier 3: Builtin CLI Engine (~/.gemini/antigravity-cli/builtin/)<br/>Default foundational toolchain"]
+        
+        L1 -->|Overrides| L2
+        L2 -->|Overrides| L3
+    end
+
+    subgraph PluginArchitecture["Plugin Internal Structure"]
+        P_JSON["plugin.json (Manifest & Version)"]
+        P_RULES["rules/AGENTS.md (Injected into Agent System Prompt)"]
+        P_SKILLS["skills/<name>/SKILL.md (Dynamic On-Demand Trigger)"]
+    end
+
+    L2 --> PluginArchitecture
+```
+
+---
+
+## 2. Invariants & Context Preservation Directives
+
+1. **Context Window Token Preservation:** Skills are **not** dumped unconditionally into the LLM context window. Instead:
+   - Behavioral directives in `rules/AGENTS.md` are active globally.
+   - Heavy procedural instructions in `SKILL.md` are loaded **only when their trigger criteria are met** (e.g. non-coding tasks bypass `eval-coding-guidance` to save tokens).
+2. **Standard YAML Frontmatter Contract:** Every skill directory must contain a valid `SKILL.md` with lowercase hyphenated frontmatter:
+   ```yaml
+   ---
+   name: my-custom-skill
+   description: Trigger-focused description with explicit keywords and scenarios.
+   ---
+   ```
+3. **Idempotent Executable Scripts:** Scripts inside `scripts/` must enforce `set -euo pipefail`, handle Apple Silicon architectures, and maintain `chmod +x`.
+
+---
+
+## 3. Plugins Catalog (`~/.gemini/config/plugins/`)
+
+| Plugin Directory | Description & Mission | Rule Path |
+| :--- | :--- | :--- |
+| `auto-skill-forge-plugin` | Autonomous skill generation and operational problem distillation whenever `/learn` is invoked or complex tasks are solved. | `rules/AGENTS.md` |
+| `eval-coding-guidance-plugin` | SWE-bench, Reflexion, Agentless, Self-Debugging, CodeT guidelines. Enforces test-first reproduction and surgical minimality. | `rules/AGENTS.md` |
+| `tooling-setup-recorder-plugin` | Automatically captures host developer tools, daemons, and CLI scripts into reusable recipes under `~/.gemini/config/skills/`. | `rules/AGENTS.md` |
+| `modern-web-guidance-plugin` | Modern HTML/CSS/JS frontend standards, Container queries, View Transitions, `:has()`, Popover APIs. | `skills/modern-web-guidance/SKILL.md` |
+| `prd-creation-plugin` | Deconstructs vague ideas into engineering-ready PRDs using a strict 4-Phase process. | `skills/prd-creation/SKILL.md` |
+| `chrome-devtools-plugin` | Chrome DevTools MCP browser automation, a11y auditing, memory leak profiling. | `skills/chrome-devtools/SKILL.md` |
+
+---
+
+## 4. Skills Catalog (`~/.gemini/config/skills/`)
+
+```
+~/.gemini/config/skills/
+├── setup-reconstitutor/      # Master autonomous setup rebuilder from blueprint specs
+├── agy-statusline/           # Sub-15ms multi-line prompt statistics gauge and context gauge
+├── macos-speech-dictation/   # Whisper Metal GPU push-to-talk dictation & 3-line pill HUD
+├── meeting-recorder/         # 1-Click & ⌥ ⌥ meeting audio capture, ScreenCaptureKit, HTML notes
+├── reviewer-mimic/           # PR review history ingestion & statistical persona profiling
+├── eval_user-reviewer/       # Synthesized reviewer persona for @eval_user
+├── willmcgugan-reviewer/     # Synthesized reviewer persona for @willmcgugan
+├── noteworthy-notes/         # Executive meeting notes synthesizer with dynamic PV & tech sections
+├── agi-remote/               # Sovereign remote messaging bridge & mobile WebSocket stream
+├── plannotator/              # Interactive browser-based plan review gate & code review UI
+└── github-cli/               # Automated gh CLI setup, credentials, and PR workflows
+```
+
+---
+
+## 5. Verification & Acceptance Smoke Test
+
+The reconstituting agent must verify that the catalog is populated and valid:
+
+```bash
+# 1. Verify Plugins exist
+for p in auto-skill-forge-plugin eval-coding-guidance-plugin tooling-setup-recorder-plugin modern-web-guidance-plugin prd-creation-plugin chrome-devtools-plugin; do
+    [ -d "$HOME/.gemini/config/plugins/$p" ] || { echo "Missing plugin: $p"; exit 1; }
+done
+echo "All 6 Plugins: VERIFIED ✅"
+
+# 2. Verify Essential Skills have SKILL.md
+for s in setup-reconstitutor agy-statusline macos-speech-dictation meeting-recorder reviewer-mimic; do
+    [ -f "$HOME/.gemini/config/skills/$s/SKILL.md" ] || { echo "Missing SKILL.md in $s"; exit 1; }
+done
+echo "Essential Skills Frontmatter: VERIFIED ✅"
+```
+
+  </script>
+
+  <script>
+    mermaid.initialize({
+      startOnLoad: false,
+      theme: 'dark',
+      securityLevel: 'loose'
+    });
+
+    const renderer = new marked.Renderer();
+    renderer.code = function(code, language) {
+      if (language === 'mermaid') {
+        return `<div class="mermaid">${code}</div>`;
+      }
+      const validLanguage = hljs.getLanguage(language) ? language : 'plaintext';
+      const highlighted = hljs.highlight(code, { language: validLanguage }).value;
+      return `<pre><button class="copy-btn" onclick="copySnippet(this)">Copy</button><code class="hljs ${validLanguage}">${highlighted}</code></pre>`;
+    };
+
+    marked.setOptions({
+      renderer: renderer,
+      gfm: true,
+      breaks: false
+    });
+
+    const markdownText = document.getElementById('raw-markdown').textContent;
+    document.getElementById('content').innerHTML = marked.parse(markdownText);
+    mermaid.run();
+
+    function copySnippet(btn) {
+      const code = btn.nextElementSibling.innerText;
+      navigator.clipboard.writeText(code).then(() => {
+        btn.innerText = 'Copied!';
+        setTimeout(() => { btn.innerText = 'Copy'; }, 2000);
+      });
+    }
+
+    function copyPrompt() {
+      const prompt = `Check my Google Drive account under ~/Library/CloudStorage/ (or via find ~/Library/CloudStorage -name 'gemini_agi_migration_bundle.zip'), extract gemini_agi_migration_bundle.zip, read README.md and AGI_AUTONOMOUS_ENVIRONMENT_SPEC.md, install the skills into ~/.gemini/config/skills/, and activate the setup-reconstitutor skill to autonomously compile and set up all programs on this computer.`;
+      navigator.clipboard.writeText(prompt).then(() => {
+        alert('Copied One-Shot AGI Instruction to clipboard!');
+      });
+    }
+  </script>
+</body>
+</html>

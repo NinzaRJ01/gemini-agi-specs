@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>One-Shot Activation README — Gemini AGI Specification</title>
+  
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/5.5.1/github-markdown-dark.min.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css" />
+  
+  <style>
+    :root {
+      --bg-page: #0d1117;
+      --bg-card: #161b22;
+      --border-color: #30363d;
+      --accent: #58a6ff;
+      --accent-purple: #bc8cff;
+      --accent-green: #3fb950;
+      --accent-orange: #d29922;
+      --text-main: #c9d1d9;
+      --text-bright: #f0f6fc;
+    }
+    body {
+      background-color: var(--bg-page);
+      color: var(--text-main);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      line-height: 1.6;
+    }
+    .top-banner {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(13, 17, 23, 0.90);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border-color);
+      padding: 14px 32px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-weight: 700;
+      font-size: 1.05rem;
+      color: var(--text-bright);
+    }
+    .badge {
+      display: inline-block;
+      padding: 3px 10px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      border-radius: 12px;
+      background: rgba(88, 166, 255, 0.15);
+      border: 1px solid rgba(88, 166, 255, 0.4);
+      color: var(--accent);
+    }
+    .actions {
+      display: flex;
+      gap: 10px;
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: #21262d;
+      color: var(--text-bright);
+      border: 1px solid var(--border-color);
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 0.82rem;
+      font-weight: 500;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.2s ease;
+    }
+    .btn:hover {
+      background: #30363d;
+      border-color: #8b949e;
+    }
+    .btn-portal {
+      background: #6e40c9;
+      border-color: #8957e5;
+      color: #fff;
+    }
+    .container {
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 32px 24px 80px 24px;
+    }
+    .markdown-body pre {
+      background-color: #161b22 !important;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 16px;
+      position: relative;
+    }
+    .copy-btn {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      background: #21262d;
+      color: #8b949e;
+      border: 1px solid var(--border-color);
+      border-radius: 4px;
+      font-size: 0.75rem;
+      padding: 3px 8px;
+      cursor: pointer;
+    }
+    .mermaid {
+      background: #161b22;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 20px;
+      margin: 20px 0;
+      display: flex;
+      justify-content: center;
+    }
+  </style>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/12.0.1/marked.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/swift.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/python.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/bash.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10.8.0/dist/mermaid.min.js"></script>
+</head>
+<body>
+  <div class="top-banner">
+    <div class="brand">
+      <span>🚀</span>
+      <span>One-Shot Activation README</span>
+      <span class="badge">Google Drive Sync</span>
+    </div>
+    <div class="actions">
+      <a href="ALL_SPECS.html#readme" class="btn btn-portal">🗂️ View in Master Portal</a>
+      <button class="btn" onclick="copyPrompt()">📋 Copy One-Shot Prompt</button>
+    </div>
+  </div>
+
+  <div class="container">
+    <div id="content" class="markdown-body"></div>
+  </div>
+
+  <script type="text/markdown" id="raw-markdown">
+# Gemini AGI & Antigravity Setup Migration Bundle
+
+> ## 🚀 ONE-SHOT AGI AGENT ACTIVATION INSTRUCTION
+> If you are on a new computer, open Antigravity (`agy`) or your Gemini AGI chat prompt and paste this exact instruction:
+> 
+> ```text
+> Check my Google Drive account under ~/Library/CloudStorage/ (or via `find ~/Library/CloudStorage -name "gemini_agi_migration_bundle.zip"`), extract gemini_agi_migration_bundle.zip, read README.md and AGI_AUTONOMOUS_ENVIRONMENT_SPEC.md, install the skills into ~/.gemini/config/skills/ and plugins into ~/.gemini/config/plugins/, and activate the setup-reconstitutor skill to autonomously compile and set up all programs on this computer.
+> ```
+
+---
+
+## What This Migration Bundle Contains
+
+This package provides a 100% self-contained reconstitution blueprint of your entire developer environment without needing to transfer source code files or large Python virtual environments:
+
+1. **`skills/`**: All 11+ custom Antigravity skills:
+   - `setup-reconstitutor`: The master agent skill that parses the component specs and authors/compiles all programs.
+   - `agy-statusline`: Sub-15ms multi-line prompt statistics gauge and context window dynamics.
+   - `macos-speech-dictation`: Whisper Metal GPU push-to-talk dictation and native Swift floating pill HUD.
+   - `meeting-recorder`: 1-Click / `⌥ ⌥` meeting audio capture, ScreenCaptureKit loopback, and executive summaries.
+   - `reviewer-mimic` & personas: `@eval_user-reviewer`, `@willmcgugan-reviewer`, PR review history ingestion.
+   - `agi-remote`, `plannotator*`, `github-cli`, `noteworthy-notes`.
+2. **`plugins/`**: All 6 plugins and global behavioral rules (`auto-skill-forge`, `eval-coding-guidance`, `tooling-setup-recorder`, `modern-web-guidance`, `prd-creation`, `chrome-devtools`).
+3. **`specs/`**: Complete component blueprint specifications with exact code templates:
+   - `01-statusline.spec.md`
+   - `02-whisper-dictation.spec.md`
+   - `03-meeting-recorder.spec.md`
+   - `04-reviewer-mimic-digest.spec.md`
+   - `05-skills-and-plugins.spec.md`
+4. **`scripts/`**:
+   - `statusline.py`: Multi-line responsive ANSI prompt statusline engine.
+   - `verify_reconstitution.sh`: Automated 6-point acceptance verification test suite.
+5. **Specification & Migration Documents**:
+   - `AGI_AUTONOMOUS_ENVIRONMENT_SPEC.md`: Engineering PRD and autonomous agent directives.
+   - `AGI_SPEC.html`: Interactive visual spec dashboard.
+   - `MIGRATION_GUIDE.md` & `MIGRATION_GUIDE.html`: Multi-machine migration guide.
+
+---
+
+## Autonomous Reconstitution Steps (Executed by the Agent)
+
+When the AGI agent receives the activation instruction above, it will:
+1. Locate and extract this zip file from `~/Library/CloudStorage/GoogleDrive-*/My Drive/`.
+2. Install `skills/` to `~/.gemini/config/skills/` and `plugins/` to `~/.gemini/config/plugins/`.
+3. Check and install Homebrew dependencies (`python@3.11`, `whisper.cpp`, `ffmpeg`, `cmake`).
+4. Read the specs in `specs/` and generate the source code for `meeting_recorder.swift`, `whisper_pill.swift`, `whisper_metal.py`, `summarize_meeting.py`, and the `digest/` review platform.
+5. Compile native Apple Silicon binaries using `swiftc -O`.
+6. Configure the Python virtual environment and symlink all binaries into `~/.local/bin/`.
+7. Download or link the Whisper Metal model weights (`ggml-base.en.bin`).
+8. Execute `verify_reconstitution.sh` to validate that all 6 system acceptance tests pass.
+
+---
+*Created by Antigravity Autonomous Systems. Preserved for seamless zero-code cross-machine migration.*
+
+  </script>
+
+  <script>
+    mermaid.initialize({
+      startOnLoad: false,
+      theme: 'dark',
+      securityLevel: 'loose'
+    });
+
+    const renderer = new marked.Renderer();
+    renderer.code = function(code, language) {
+      if (language === 'mermaid') {
+        return `<div class="mermaid">${code}</div>`;
+      }
+      const validLanguage = hljs.getLanguage(language) ? language : 'plaintext';
+      const highlighted = hljs.highlight(code, { language: validLanguage }).value;
+      return `<pre><button class="copy-btn" onclick="copySnippet(this)">Copy</button><code class="hljs ${validLanguage}">${highlighted}</code></pre>`;
+    };
+
+    marked.setOptions({
+      renderer: renderer,
+      gfm: true,
+      breaks: false
+    });
+
+    const markdownText = document.getElementById('raw-markdown').textContent;
+    document.getElementById('content').innerHTML = marked.parse(markdownText);
+    mermaid.run();
+
+    function copySnippet(btn) {
+      const code = btn.nextElementSibling.innerText;
+      navigator.clipboard.writeText(code).then(() => {
+        btn.innerText = 'Copied!';
+        setTimeout(() => { btn.innerText = 'Copy'; }, 2000);
+      });
+    }
+
+    function copyPrompt() {
+      const prompt = `Check my Google Drive account under ~/Library/CloudStorage/ (or via find ~/Library/CloudStorage -name 'gemini_agi_migration_bundle.zip'), extract gemini_agi_migration_bundle.zip, read README.md and AGI_AUTONOMOUS_ENVIRONMENT_SPEC.md, install the skills into ~/.gemini/config/skills/, and activate the setup-reconstitutor skill to autonomously compile and set up all programs on this computer.`;
+      navigator.clipboard.writeText(prompt).then(() => {
+        alert('Copied One-Shot AGI Instruction to clipboard!');
+      });
+    }
+  </script>
+</body>
+</html>
